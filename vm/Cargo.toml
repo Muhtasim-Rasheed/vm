@@ -1,0 +1,8 @@
+[package]
+name = "vm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+isa = { version = "0.1.0", path = "../isa" }
+macroquad = "0.4.14"
