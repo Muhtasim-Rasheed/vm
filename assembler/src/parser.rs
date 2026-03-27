@@ -1,8 +1,14 @@
 use isa::{MemoryMode, Opcode, Register};
 use nom::{
-    branch::alt, bytes::{
-        complete::{escaped_transform, tag, tag_no_case, take_while}, is_not, take_until
-    }, character::complete::{multispace1, satisfy}, combinator::{map, not, peek, recognize, value}, sequence::{delimited, pair, preceded, terminated}, IResult, Parser
+    IResult, Parser,
+    branch::alt,
+    bytes::{
+        complete::{escaped_transform, tag, tag_no_case, take_while},
+        is_not, take_until,
+    },
+    character::complete::{multispace1, satisfy},
+    combinator::{map, not, peek, recognize, value},
+    sequence::{delimited, pair, preceded, terminated},
 };
 
 fn ws<'a, F, O>(inner: F) -> impl Parser<&'a str, Output = O, Error = nom::error::Error<&'a str>>
@@ -191,7 +197,7 @@ fn parse_data_directive<'a>(input: &'a str) -> IResult<&'a str, Directive<'a>> {
         ws(tag(".")),
         preceded(
             tag("data"),
-            ws(nom::multi::separated_list0(ws(tag(",")), parse_item)).map(Directive::Data)
+            ws(nom::multi::separated_list0(ws(tag(",")), parse_item)).map(Directive::Data),
         ),
     )
     .parse(input)
@@ -202,7 +208,7 @@ fn parse_word_directive<'a>(input: &'a str) -> IResult<&'a str, Directive<'a>> {
         ws(tag(".")),
         preceded(
             tag("word"),
-            ws(nom::multi::separated_list0(ws(tag(",")), parse_expr)).map(Directive::Word)
+            ws(nom::multi::separated_list0(ws(tag(",")), parse_expr)).map(Directive::Word),
         ),
     )
     .parse(input)
@@ -254,7 +260,8 @@ fn parse_string(input: &str) -> IResult<&str, String> {
             )),
         ),
         nom::character::complete::char('"'),
-    ).parse(input)
+    )
+    .parse(input)
 }
 
 fn parse_label(input: &str) -> IResult<&str, &str> {

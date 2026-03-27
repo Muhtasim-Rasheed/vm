@@ -141,7 +141,7 @@ impl Cpu {
             // }
             Opcode::RET => {
                 let ret_addr = mem.read_u32(self.bp);
-                let old_bp   = mem.read_u32(self.bp + 4);
+                let old_bp = mem.read_u32(self.bp + 4);
                 self.sp = self.bp + 8;
                 self.bp = old_bp;
                 self.pc = ret_addr;
