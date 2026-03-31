@@ -1,18 +1,32 @@
-const GRID_OFFSET: int = 0x001F0000;
+const GRID_OFFSET: *char = 0x001F0000;
 
 let cursor_x: int = 0;
 let cursor_y: int = 0;
-let current_color: int = 0xFF;
+let current_color: char = cast<char> 0xFF;
 
 fn _start() void {
-	let string: *char = &"Hello, World!\n";
+	let string: *char = "Hello, World!\n";
 
 	puts(string);
 	while 1 {}
 }
 
+fn puts(c: *char) void {
+	while *c {
+		putc(*c);
+		c = c + 1;
+	}
+}
+
+fn putc(c: char) void {
+	let off: *char = GRID_OFFSET + (cursor_x + cursor_y * 80) * 2;
+	*off = c;
+	*(off + 1) = current_color;
+}
+
 fn advance_cursor() void {
 	cursor_x = cursor_x + 1;
+
 	if cursor_x < 80 {
 		return;
 	}
@@ -22,17 +36,4 @@ fn advance_cursor() void {
 		return;
 	}
 	cursor_y = 0;
-}
-
-fn putc(c: char) void {
-	let off: *char = GRID_OFFSET + (cursor_x + cursor_y * 80) * 2;
-	*off = c;
-	*(off + 1) = current_color;
-}
-
-fn puts(c: *char) void {
-	while *c {
-		putc(*c);
-		c = c + 1;
-	}
 }

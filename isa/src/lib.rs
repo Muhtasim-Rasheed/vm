@@ -139,6 +139,8 @@ pub enum Opcode {
     MOVI,
     LOAD,
     STORE,
+    LOADB,
+    STOREB,
 
     ADD,
     SUB,
@@ -187,7 +189,7 @@ impl Opcode {
             MOVI | NOTI | CMPI => InstructionFormat::RI,
             ADD | SUB | MUL | DIV | MOD | AND | OR | XOR => InstructionFormat::RRR,
             ADDI | SUBI | MULI | DIVI | MODI | ANDI | ORI | XORI => InstructionFormat::RRI,
-            LOAD | STORE => InstructionFormat::M,
+            LOAD | STORE | LOADB | STOREB => InstructionFormat::M,
             JMP | JE | JNE | JG | JL | CALL => InstructionFormat::J,
         }
     }
@@ -204,6 +206,8 @@ impl TryFrom<u8> for Opcode {
             0x01 => Ok(MOVI),
             0x02 => Ok(LOAD),
             0x03 => Ok(STORE),
+            0x04 => Ok(LOADB),
+            0x05 => Ok(STOREB),
 
             0x10 => Ok(ADD),
             0x11 => Ok(SUB),
@@ -255,6 +259,8 @@ impl From<Opcode> for u8 {
             MOVI => 0x01,
             LOAD => 0x02,
             STORE => 0x03,
+            LOADB => 0x04,
+            STOREB => 0x05,
 
             ADD => 0x10,
             SUB => 0x11,
@@ -559,14 +565,14 @@ impl std::fmt::Display for Instruction {
                 reg2,
                 imm,
             } => match opcode {
-                Opcode::LOAD => match mode {
+                Opcode::LOAD | Opcode::LOADB => match mode {
                     MemoryMode::Direct => write!(f, "{} {}, [0x{:X}]", opcode, reg1, imm),
                     MemoryMode::Indirect => write!(f, "{} {}, [{}]", opcode, reg1, reg2),
                     MemoryMode::Indexed => {
                         write!(f, "{} {}, [{} + 0x{:X}]", opcode, reg1, reg2, imm)
                     }
                 },
-                Opcode::STORE => match mode {
+                Opcode::STORE | Opcode::STOREB => match mode {
                     MemoryMode::Direct => write!(f, "{} [0x{:X}], {}", opcode, imm, reg1),
                     MemoryMode::Indirect => write!(f, "{} [{}], {}", opcode, reg2, reg1),
                     MemoryMode::Indexed => {

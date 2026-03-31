@@ -1,0 +1,1889 @@
+[
+    StmtNode {
+        stmt: Const {
+            name: "GRID_OFFSET",
+            ty: Ptr(
+                Char,
+            ),
+            value: ExprNode {
+                expr: IntLiteral(
+                    2031616,
+                ),
+                span: Span {
+                    start: Location {
+                        line: 1,
+                        column: 28,
+                        offset: 27,
+                    },
+                    end: Location {
+                        line: 1,
+                        column: 38,
+                        offset: 37,
+                    },
+                    start_offset: 27,
+                    end_offset: 37,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 1,
+                column: 1,
+                offset: 0,
+            },
+            end: Location {
+                line: 1,
+                column: 39,
+                offset: 38,
+            },
+            start_offset: 0,
+            end_offset: 38,
+        },
+    },
+    StmtNode {
+        stmt: Let {
+            name: "cursor_x",
+            ty: Int,
+            value: ExprNode {
+                expr: IntLiteral(
+                    0,
+                ),
+                span: Span {
+                    start: Location {
+                        line: 3,
+                        column: 21,
+                        offset: 60,
+                    },
+                    end: Location {
+                        line: 3,
+                        column: 22,
+                        offset: 61,
+                    },
+                    start_offset: 60,
+                    end_offset: 61,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 3,
+                column: 1,
+                offset: 40,
+            },
+            end: Location {
+                line: 3,
+                column: 23,
+                offset: 62,
+            },
+            start_offset: 40,
+            end_offset: 62,
+        },
+    },
+    StmtNode {
+        stmt: Let {
+            name: "cursor_y",
+            ty: Int,
+            value: ExprNode {
+                expr: IntLiteral(
+                    0,
+                ),
+                span: Span {
+                    start: Location {
+                        line: 4,
+                        column: 21,
+                        offset: 83,
+                    },
+                    end: Location {
+                        line: 4,
+                        column: 22,
+                        offset: 84,
+                    },
+                    start_offset: 83,
+                    end_offset: 84,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 4,
+                column: 1,
+                offset: 63,
+            },
+            end: Location {
+                line: 4,
+                column: 23,
+                offset: 85,
+            },
+            start_offset: 63,
+            end_offset: 85,
+        },
+    },
+    StmtNode {
+        stmt: Let {
+            name: "current_color",
+            ty: Char,
+            value: ExprNode {
+                expr: Cast {
+                    expr: ExprNode {
+                        expr: IntLiteral(
+                            255,
+                        ),
+                        span: Span {
+                            start: Location {
+                                line: 5,
+                                column: 38,
+                                offset: 123,
+                            },
+                            end: Location {
+                                line: 5,
+                                column: 42,
+                                offset: 127,
+                            },
+                            start_offset: 123,
+                            end_offset: 127,
+                        },
+                    },
+                    target_ty: Char,
+                },
+                span: Span {
+                    start: Location {
+                        line: 5,
+                        column: 27,
+                        offset: 112,
+                    },
+                    end: Location {
+                        line: 5,
+                        column: 42,
+                        offset: 127,
+                    },
+                    start_offset: 112,
+                    end_offset: 127,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 5,
+                column: 1,
+                offset: 86,
+            },
+            end: Location {
+                line: 5,
+                column: 43,
+                offset: 128,
+            },
+            start_offset: 86,
+            end_offset: 128,
+        },
+    },
+    StmtNode {
+        stmt: FunctionDecl {
+            name: "_start",
+            params: [],
+            return_ty: Void,
+            signature_span: Span {
+                start: Location {
+                    line: 7,
+                    column: 1,
+                    offset: 130,
+                },
+                end: Location {
+                    line: 7,
+                    column: 18,
+                    offset: 147,
+                },
+                start_offset: 130,
+                end_offset: 147,
+            },
+            body: StmtNode {
+                stmt: Block(
+                    [
+                        StmtNode {
+                            stmt: Let {
+                                name: "string",
+                                ty: Ptr(
+                                    Char,
+                                ),
+                                value: ExprNode {
+                                    expr: StringLiteral(
+                                        "Hello, World!\n",
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 8,
+                                            column: 22,
+                                            offset: 170,
+                                        },
+                                        end: Location {
+                                            line: 8,
+                                            column: 39,
+                                            offset: 187,
+                                        },
+                                        start_offset: 170,
+                                        end_offset: 187,
+                                    },
+                                },
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 8,
+                                    column: 2,
+                                    offset: 150,
+                                },
+                                end: Location {
+                                    line: 8,
+                                    column: 40,
+                                    offset: 188,
+                                },
+                                start_offset: 150,
+                                end_offset: 188,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: Call {
+                                        func: ExprNode {
+                                            expr: Var(
+                                                "puts",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 10,
+                                                    column: 2,
+                                                    offset: 191,
+                                                },
+                                                end: Location {
+                                                    line: 10,
+                                                    column: 6,
+                                                    offset: 195,
+                                                },
+                                                start_offset: 191,
+                                                end_offset: 195,
+                                            },
+                                        },
+                                        args: [
+                                            ExprNode {
+                                                expr: Var(
+                                                    "string",
+                                                ),
+                                                span: Span {
+                                                    start: Location {
+                                                        line: 10,
+                                                        column: 7,
+                                                        offset: 196,
+                                                    },
+                                                    end: Location {
+                                                        line: 10,
+                                                        column: 13,
+                                                        offset: 202,
+                                                    },
+                                                    start_offset: 196,
+                                                    end_offset: 202,
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 10,
+                                            column: 2,
+                                            offset: 191,
+                                        },
+                                        end: Location {
+                                            line: 10,
+                                            column: 14,
+                                            offset: 203,
+                                        },
+                                        start_offset: 191,
+                                        end_offset: 203,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 10,
+                                    column: 2,
+                                    offset: 191,
+                                },
+                                end: Location {
+                                    line: 10,
+                                    column: 15,
+                                    offset: 204,
+                                },
+                                start_offset: 191,
+                                end_offset: 204,
+                            },
+                        },
+                        StmtNode {
+                            stmt: While {
+                                condition: ExprNode {
+                                    expr: IntLiteral(
+                                        1,
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 11,
+                                            column: 8,
+                                            offset: 212,
+                                        },
+                                        end: Location {
+                                            line: 11,
+                                            column: 9,
+                                            offset: 213,
+                                        },
+                                        start_offset: 212,
+                                        end_offset: 213,
+                                    },
+                                },
+                                body: StmtNode {
+                                    stmt: Block(
+                                        [],
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 11,
+                                            column: 10,
+                                            offset: 214,
+                                        },
+                                        end: Location {
+                                            line: 11,
+                                            column: 12,
+                                            offset: 216,
+                                        },
+                                        start_offset: 214,
+                                        end_offset: 216,
+                                    },
+                                },
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 11,
+                                    column: 2,
+                                    offset: 206,
+                                },
+                                end: Location {
+                                    line: 11,
+                                    column: 12,
+                                    offset: 216,
+                                },
+                                start_offset: 206,
+                                end_offset: 216,
+                            },
+                        },
+                    ],
+                ),
+                span: Span {
+                    start: Location {
+                        line: 7,
+                        column: 18,
+                        offset: 147,
+                    },
+                    end: Location {
+                        line: 12,
+                        column: 2,
+                        offset: 218,
+                    },
+                    start_offset: 147,
+                    end_offset: 218,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 7,
+                column: 1,
+                offset: 130,
+            },
+            end: Location {
+                line: 12,
+                column: 2,
+                offset: 218,
+            },
+            start_offset: 130,
+            end_offset: 218,
+        },
+    },
+    StmtNode {
+        stmt: FunctionDecl {
+            name: "puts",
+            params: [
+                (
+                    "c",
+                    Ptr(
+                        Char,
+                    ),
+                ),
+            ],
+            return_ty: Void,
+            signature_span: Span {
+                start: Location {
+                    line: 14,
+                    column: 1,
+                    offset: 220,
+                },
+                end: Location {
+                    line: 14,
+                    column: 24,
+                    offset: 243,
+                },
+                start_offset: 220,
+                end_offset: 243,
+            },
+            body: StmtNode {
+                stmt: Block(
+                    [
+                        StmtNode {
+                            stmt: While {
+                                condition: ExprNode {
+                                    expr: Deref(
+                                        ExprNode {
+                                            expr: Var(
+                                                "c",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 15,
+                                                    column: 9,
+                                                    offset: 253,
+                                                },
+                                                end: Location {
+                                                    line: 15,
+                                                    column: 10,
+                                                    offset: 254,
+                                                },
+                                                start_offset: 253,
+                                                end_offset: 254,
+                                            },
+                                        },
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 15,
+                                            column: 8,
+                                            offset: 252,
+                                        },
+                                        end: Location {
+                                            line: 15,
+                                            column: 10,
+                                            offset: 254,
+                                        },
+                                        start_offset: 252,
+                                        end_offset: 254,
+                                    },
+                                },
+                                body: StmtNode {
+                                    stmt: Block(
+                                        [
+                                            StmtNode {
+                                                stmt: Expr(
+                                                    ExprNode {
+                                                        expr: Call {
+                                                            func: ExprNode {
+                                                                expr: Var(
+                                                                    "putc",
+                                                                ),
+                                                                span: Span {
+                                                                    start: Location {
+                                                                        line: 16,
+                                                                        column: 3,
+                                                                        offset: 259,
+                                                                    },
+                                                                    end: Location {
+                                                                        line: 16,
+                                                                        column: 7,
+                                                                        offset: 263,
+                                                                    },
+                                                                    start_offset: 259,
+                                                                    end_offset: 263,
+                                                                },
+                                                            },
+                                                            args: [
+                                                                ExprNode {
+                                                                    expr: Deref(
+                                                                        ExprNode {
+                                                                            expr: Var(
+                                                                                "c",
+                                                                            ),
+                                                                            span: Span {
+                                                                                start: Location {
+                                                                                    line: 16,
+                                                                                    column: 9,
+                                                                                    offset: 265,
+                                                                                },
+                                                                                end: Location {
+                                                                                    line: 16,
+                                                                                    column: 10,
+                                                                                    offset: 266,
+                                                                                },
+                                                                                start_offset: 265,
+                                                                                end_offset: 266,
+                                                                            },
+                                                                        },
+                                                                    ),
+                                                                    span: Span {
+                                                                        start: Location {
+                                                                            line: 16,
+                                                                            column: 8,
+                                                                            offset: 264,
+                                                                        },
+                                                                        end: Location {
+                                                                            line: 16,
+                                                                            column: 10,
+                                                                            offset: 266,
+                                                                        },
+                                                                        start_offset: 264,
+                                                                        end_offset: 266,
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        span: Span {
+                                                            start: Location {
+                                                                line: 16,
+                                                                column: 3,
+                                                                offset: 259,
+                                                            },
+                                                            end: Location {
+                                                                line: 16,
+                                                                column: 11,
+                                                                offset: 267,
+                                                            },
+                                                            start_offset: 259,
+                                                            end_offset: 267,
+                                                        },
+                                                    },
+                                                ),
+                                                span: Span {
+                                                    start: Location {
+                                                        line: 16,
+                                                        column: 3,
+                                                        offset: 259,
+                                                    },
+                                                    end: Location {
+                                                        line: 16,
+                                                        column: 12,
+                                                        offset: 268,
+                                                    },
+                                                    start_offset: 259,
+                                                    end_offset: 268,
+                                                },
+                                            },
+                                            StmtNode {
+                                                stmt: Expr(
+                                                    ExprNode {
+                                                        expr: BinaryOp {
+                                                            op: "=",
+                                                            left: ExprNode {
+                                                                expr: Var(
+                                                                    "c",
+                                                                ),
+                                                                span: Span {
+                                                                    start: Location {
+                                                                        line: 17,
+                                                                        column: 3,
+                                                                        offset: 271,
+                                                                    },
+                                                                    end: Location {
+                                                                        line: 17,
+                                                                        column: 4,
+                                                                        offset: 272,
+                                                                    },
+                                                                    start_offset: 271,
+                                                                    end_offset: 272,
+                                                                },
+                                                            },
+                                                            right: ExprNode {
+                                                                expr: BinaryOp {
+                                                                    op: "+",
+                                                                    left: ExprNode {
+                                                                        expr: Var(
+                                                                            "c",
+                                                                        ),
+                                                                        span: Span {
+                                                                            start: Location {
+                                                                                line: 17,
+                                                                                column: 7,
+                                                                                offset: 275,
+                                                                            },
+                                                                            end: Location {
+                                                                                line: 17,
+                                                                                column: 8,
+                                                                                offset: 276,
+                                                                            },
+                                                                            start_offset: 275,
+                                                                            end_offset: 276,
+                                                                        },
+                                                                    },
+                                                                    right: ExprNode {
+                                                                        expr: IntLiteral(
+                                                                            1,
+                                                                        ),
+                                                                        span: Span {
+                                                                            start: Location {
+                                                                                line: 17,
+                                                                                column: 11,
+                                                                                offset: 279,
+                                                                            },
+                                                                            end: Location {
+                                                                                line: 17,
+                                                                                column: 12,
+                                                                                offset: 280,
+                                                                            },
+                                                                            start_offset: 279,
+                                                                            end_offset: 280,
+                                                                        },
+                                                                    },
+                                                                },
+                                                                span: Span {
+                                                                    start: Location {
+                                                                        line: 17,
+                                                                        column: 7,
+                                                                        offset: 275,
+                                                                    },
+                                                                    end: Location {
+                                                                        line: 17,
+                                                                        column: 12,
+                                                                        offset: 280,
+                                                                    },
+                                                                    start_offset: 275,
+                                                                    end_offset: 280,
+                                                                },
+                                                            },
+                                                        },
+                                                        span: Span {
+                                                            start: Location {
+                                                                line: 17,
+                                                                column: 3,
+                                                                offset: 271,
+                                                            },
+                                                            end: Location {
+                                                                line: 17,
+                                                                column: 12,
+                                                                offset: 280,
+                                                            },
+                                                            start_offset: 271,
+                                                            end_offset: 280,
+                                                        },
+                                                    },
+                                                ),
+                                                span: Span {
+                                                    start: Location {
+                                                        line: 17,
+                                                        column: 3,
+                                                        offset: 271,
+                                                    },
+                                                    end: Location {
+                                                        line: 17,
+                                                        column: 13,
+                                                        offset: 281,
+                                                    },
+                                                    start_offset: 271,
+                                                    end_offset: 281,
+                                                },
+                                            },
+                                        ],
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 15,
+                                            column: 11,
+                                            offset: 255,
+                                        },
+                                        end: Location {
+                                            line: 18,
+                                            column: 3,
+                                            offset: 284,
+                                        },
+                                        start_offset: 255,
+                                        end_offset: 284,
+                                    },
+                                },
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 15,
+                                    column: 2,
+                                    offset: 246,
+                                },
+                                end: Location {
+                                    line: 18,
+                                    column: 3,
+                                    offset: 284,
+                                },
+                                start_offset: 246,
+                                end_offset: 284,
+                            },
+                        },
+                    ],
+                ),
+                span: Span {
+                    start: Location {
+                        line: 14,
+                        column: 24,
+                        offset: 243,
+                    },
+                    end: Location {
+                        line: 19,
+                        column: 2,
+                        offset: 286,
+                    },
+                    start_offset: 243,
+                    end_offset: 286,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 14,
+                column: 1,
+                offset: 220,
+            },
+            end: Location {
+                line: 19,
+                column: 2,
+                offset: 286,
+            },
+            start_offset: 220,
+            end_offset: 286,
+        },
+    },
+    StmtNode {
+        stmt: FunctionDecl {
+            name: "putc",
+            params: [
+                (
+                    "c",
+                    Char,
+                ),
+            ],
+            return_ty: Void,
+            signature_span: Span {
+                start: Location {
+                    line: 21,
+                    column: 1,
+                    offset: 288,
+                },
+                end: Location {
+                    line: 21,
+                    column: 23,
+                    offset: 310,
+                },
+                start_offset: 288,
+                end_offset: 310,
+            },
+            body: StmtNode {
+                stmt: Block(
+                    [
+                        StmtNode {
+                            stmt: Let {
+                                name: "off",
+                                ty: Ptr(
+                                    Char,
+                                ),
+                                value: ExprNode {
+                                    expr: BinaryOp {
+                                        op: "+",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "GRID_OFFSET",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 22,
+                                                    column: 19,
+                                                    offset: 330,
+                                                },
+                                                end: Location {
+                                                    line: 22,
+                                                    column: 30,
+                                                    offset: 341,
+                                                },
+                                                start_offset: 330,
+                                                end_offset: 341,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: BinaryOp {
+                                                op: "*",
+                                                left: ExprNode {
+                                                    expr: BinaryOp {
+                                                        op: "+",
+                                                        left: ExprNode {
+                                                            expr: Var(
+                                                                "cursor_x",
+                                                            ),
+                                                            span: Span {
+                                                                start: Location {
+                                                                    line: 22,
+                                                                    column: 34,
+                                                                    offset: 345,
+                                                                },
+                                                                end: Location {
+                                                                    line: 22,
+                                                                    column: 42,
+                                                                    offset: 353,
+                                                                },
+                                                                start_offset: 345,
+                                                                end_offset: 353,
+                                                            },
+                                                        },
+                                                        right: ExprNode {
+                                                            expr: BinaryOp {
+                                                                op: "*",
+                                                                left: ExprNode {
+                                                                    expr: Var(
+                                                                        "cursor_y",
+                                                                    ),
+                                                                    span: Span {
+                                                                        start: Location {
+                                                                            line: 22,
+                                                                            column: 45,
+                                                                            offset: 356,
+                                                                        },
+                                                                        end: Location {
+                                                                            line: 22,
+                                                                            column: 53,
+                                                                            offset: 364,
+                                                                        },
+                                                                        start_offset: 356,
+                                                                        end_offset: 364,
+                                                                    },
+                                                                },
+                                                                right: ExprNode {
+                                                                    expr: IntLiteral(
+                                                                        80,
+                                                                    ),
+                                                                    span: Span {
+                                                                        start: Location {
+                                                                            line: 22,
+                                                                            column: 56,
+                                                                            offset: 367,
+                                                                        },
+                                                                        end: Location {
+                                                                            line: 22,
+                                                                            column: 58,
+                                                                            offset: 369,
+                                                                        },
+                                                                        start_offset: 367,
+                                                                        end_offset: 369,
+                                                                    },
+                                                                },
+                                                            },
+                                                            span: Span {
+                                                                start: Location {
+                                                                    line: 22,
+                                                                    column: 45,
+                                                                    offset: 356,
+                                                                },
+                                                                end: Location {
+                                                                    line: 22,
+                                                                    column: 58,
+                                                                    offset: 369,
+                                                                },
+                                                                start_offset: 356,
+                                                                end_offset: 369,
+                                                            },
+                                                        },
+                                                    },
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 22,
+                                                            column: 33,
+                                                            offset: 344,
+                                                        },
+                                                        end: Location {
+                                                            line: 22,
+                                                            column: 59,
+                                                            offset: 370,
+                                                        },
+                                                        start_offset: 344,
+                                                        end_offset: 370,
+                                                    },
+                                                },
+                                                right: ExprNode {
+                                                    expr: IntLiteral(
+                                                        2,
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 22,
+                                                            column: 62,
+                                                            offset: 373,
+                                                        },
+                                                        end: Location {
+                                                            line: 22,
+                                                            column: 63,
+                                                            offset: 374,
+                                                        },
+                                                        start_offset: 373,
+                                                        end_offset: 374,
+                                                    },
+                                                },
+                                            },
+                                            span: Span {
+                                                start: Location {
+                                                    line: 22,
+                                                    column: 33,
+                                                    offset: 344,
+                                                },
+                                                end: Location {
+                                                    line: 22,
+                                                    column: 63,
+                                                    offset: 374,
+                                                },
+                                                start_offset: 344,
+                                                end_offset: 374,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 22,
+                                            column: 19,
+                                            offset: 330,
+                                        },
+                                        end: Location {
+                                            line: 22,
+                                            column: 63,
+                                            offset: 374,
+                                        },
+                                        start_offset: 330,
+                                        end_offset: 374,
+                                    },
+                                },
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 22,
+                                    column: 2,
+                                    offset: 313,
+                                },
+                                end: Location {
+                                    line: 22,
+                                    column: 64,
+                                    offset: 375,
+                                },
+                                start_offset: 313,
+                                end_offset: 375,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Deref(
+                                                ExprNode {
+                                                    expr: Var(
+                                                        "off",
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 23,
+                                                            column: 3,
+                                                            offset: 378,
+                                                        },
+                                                        end: Location {
+                                                            line: 23,
+                                                            column: 6,
+                                                            offset: 381,
+                                                        },
+                                                        start_offset: 378,
+                                                        end_offset: 381,
+                                                    },
+                                                },
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 23,
+                                                    column: 2,
+                                                    offset: 377,
+                                                },
+                                                end: Location {
+                                                    line: 23,
+                                                    column: 6,
+                                                    offset: 381,
+                                                },
+                                                start_offset: 377,
+                                                end_offset: 381,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: Var(
+                                                "c",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 23,
+                                                    column: 9,
+                                                    offset: 384,
+                                                },
+                                                end: Location {
+                                                    line: 23,
+                                                    column: 10,
+                                                    offset: 385,
+                                                },
+                                                start_offset: 384,
+                                                end_offset: 385,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 23,
+                                            column: 2,
+                                            offset: 377,
+                                        },
+                                        end: Location {
+                                            line: 23,
+                                            column: 10,
+                                            offset: 385,
+                                        },
+                                        start_offset: 377,
+                                        end_offset: 385,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 23,
+                                    column: 2,
+                                    offset: 377,
+                                },
+                                end: Location {
+                                    line: 23,
+                                    column: 11,
+                                    offset: 386,
+                                },
+                                start_offset: 377,
+                                end_offset: 386,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Deref(
+                                                ExprNode {
+                                                    expr: BinaryOp {
+                                                        op: "+",
+                                                        left: ExprNode {
+                                                            expr: Var(
+                                                                "off",
+                                                            ),
+                                                            span: Span {
+                                                                start: Location {
+                                                                    line: 24,
+                                                                    column: 4,
+                                                                    offset: 390,
+                                                                },
+                                                                end: Location {
+                                                                    line: 24,
+                                                                    column: 7,
+                                                                    offset: 393,
+                                                                },
+                                                                start_offset: 390,
+                                                                end_offset: 393,
+                                                            },
+                                                        },
+                                                        right: ExprNode {
+                                                            expr: IntLiteral(
+                                                                1,
+                                                            ),
+                                                            span: Span {
+                                                                start: Location {
+                                                                    line: 24,
+                                                                    column: 10,
+                                                                    offset: 396,
+                                                                },
+                                                                end: Location {
+                                                                    line: 24,
+                                                                    column: 11,
+                                                                    offset: 397,
+                                                                },
+                                                                start_offset: 396,
+                                                                end_offset: 397,
+                                                            },
+                                                        },
+                                                    },
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 24,
+                                                            column: 3,
+                                                            offset: 389,
+                                                        },
+                                                        end: Location {
+                                                            line: 24,
+                                                            column: 12,
+                                                            offset: 398,
+                                                        },
+                                                        start_offset: 389,
+                                                        end_offset: 398,
+                                                    },
+                                                },
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 24,
+                                                    column: 2,
+                                                    offset: 388,
+                                                },
+                                                end: Location {
+                                                    line: 24,
+                                                    column: 12,
+                                                    offset: 398,
+                                                },
+                                                start_offset: 388,
+                                                end_offset: 398,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: Var(
+                                                "current_color",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 24,
+                                                    column: 15,
+                                                    offset: 401,
+                                                },
+                                                end: Location {
+                                                    line: 24,
+                                                    column: 28,
+                                                    offset: 414,
+                                                },
+                                                start_offset: 401,
+                                                end_offset: 414,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 24,
+                                            column: 2,
+                                            offset: 388,
+                                        },
+                                        end: Location {
+                                            line: 24,
+                                            column: 28,
+                                            offset: 414,
+                                        },
+                                        start_offset: 388,
+                                        end_offset: 414,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 24,
+                                    column: 2,
+                                    offset: 388,
+                                },
+                                end: Location {
+                                    line: 24,
+                                    column: 29,
+                                    offset: 415,
+                                },
+                                start_offset: 388,
+                                end_offset: 415,
+                            },
+                        },
+                    ],
+                ),
+                span: Span {
+                    start: Location {
+                        line: 21,
+                        column: 23,
+                        offset: 310,
+                    },
+                    end: Location {
+                        line: 25,
+                        column: 2,
+                        offset: 417,
+                    },
+                    start_offset: 310,
+                    end_offset: 417,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 21,
+                column: 1,
+                offset: 288,
+            },
+            end: Location {
+                line: 25,
+                column: 2,
+                offset: 417,
+            },
+            start_offset: 288,
+            end_offset: 417,
+        },
+    },
+    StmtNode {
+        stmt: FunctionDecl {
+            name: "advance_cursor",
+            params: [],
+            return_ty: Void,
+            signature_span: Span {
+                start: Location {
+                    line: 27,
+                    column: 1,
+                    offset: 419,
+                },
+                end: Location {
+                    line: 27,
+                    column: 26,
+                    offset: 444,
+                },
+                start_offset: 419,
+                end_offset: 444,
+            },
+            body: StmtNode {
+                stmt: Block(
+                    [
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_x",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 28,
+                                                    column: 2,
+                                                    offset: 447,
+                                                },
+                                                end: Location {
+                                                    line: 28,
+                                                    column: 10,
+                                                    offset: 455,
+                                                },
+                                                start_offset: 447,
+                                                end_offset: 455,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: BinaryOp {
+                                                op: "+",
+                                                left: ExprNode {
+                                                    expr: Var(
+                                                        "cursor_x",
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 28,
+                                                            column: 13,
+                                                            offset: 458,
+                                                        },
+                                                        end: Location {
+                                                            line: 28,
+                                                            column: 21,
+                                                            offset: 466,
+                                                        },
+                                                        start_offset: 458,
+                                                        end_offset: 466,
+                                                    },
+                                                },
+                                                right: ExprNode {
+                                                    expr: IntLiteral(
+                                                        1,
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 28,
+                                                            column: 24,
+                                                            offset: 469,
+                                                        },
+                                                        end: Location {
+                                                            line: 28,
+                                                            column: 25,
+                                                            offset: 470,
+                                                        },
+                                                        start_offset: 469,
+                                                        end_offset: 470,
+                                                    },
+                                                },
+                                            },
+                                            span: Span {
+                                                start: Location {
+                                                    line: 28,
+                                                    column: 13,
+                                                    offset: 458,
+                                                },
+                                                end: Location {
+                                                    line: 28,
+                                                    column: 25,
+                                                    offset: 470,
+                                                },
+                                                start_offset: 458,
+                                                end_offset: 470,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 28,
+                                            column: 2,
+                                            offset: 447,
+                                        },
+                                        end: Location {
+                                            line: 28,
+                                            column: 25,
+                                            offset: 470,
+                                        },
+                                        start_offset: 447,
+                                        end_offset: 470,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 28,
+                                    column: 2,
+                                    offset: 447,
+                                },
+                                end: Location {
+                                    line: 28,
+                                    column: 26,
+                                    offset: 471,
+                                },
+                                start_offset: 447,
+                                end_offset: 471,
+                            },
+                        },
+                        StmtNode {
+                            stmt: If {
+                                condition: ExprNode {
+                                    expr: BinaryOp {
+                                        op: "<",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_x",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 30,
+                                                    column: 5,
+                                                    offset: 477,
+                                                },
+                                                end: Location {
+                                                    line: 30,
+                                                    column: 13,
+                                                    offset: 485,
+                                                },
+                                                start_offset: 477,
+                                                end_offset: 485,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: IntLiteral(
+                                                80,
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 30,
+                                                    column: 16,
+                                                    offset: 488,
+                                                },
+                                                end: Location {
+                                                    line: 30,
+                                                    column: 18,
+                                                    offset: 490,
+                                                },
+                                                start_offset: 488,
+                                                end_offset: 490,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 30,
+                                            column: 5,
+                                            offset: 477,
+                                        },
+                                        end: Location {
+                                            line: 30,
+                                            column: 18,
+                                            offset: 490,
+                                        },
+                                        start_offset: 477,
+                                        end_offset: 490,
+                                    },
+                                },
+                                then_branch: StmtNode {
+                                    stmt: Block(
+                                        [
+                                            StmtNode {
+                                                stmt: Return(
+                                                    None,
+                                                ),
+                                                span: Span {
+                                                    start: Location {
+                                                        line: 31,
+                                                        column: 3,
+                                                        offset: 495,
+                                                    },
+                                                    end: Location {
+                                                        line: 31,
+                                                        column: 10,
+                                                        offset: 502,
+                                                    },
+                                                    start_offset: 495,
+                                                    end_offset: 502,
+                                                },
+                                            },
+                                        ],
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 30,
+                                            column: 19,
+                                            offset: 491,
+                                        },
+                                        end: Location {
+                                            line: 32,
+                                            column: 3,
+                                            offset: 505,
+                                        },
+                                        start_offset: 491,
+                                        end_offset: 505,
+                                    },
+                                },
+                                else_branch: None,
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 30,
+                                    column: 2,
+                                    offset: 474,
+                                },
+                                end: Location {
+                                    line: 32,
+                                    column: 3,
+                                    offset: 505,
+                                },
+                                start_offset: 474,
+                                end_offset: 505,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_y",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 33,
+                                                    column: 2,
+                                                    offset: 507,
+                                                },
+                                                end: Location {
+                                                    line: 33,
+                                                    column: 10,
+                                                    offset: 515,
+                                                },
+                                                start_offset: 507,
+                                                end_offset: 515,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: BinaryOp {
+                                                op: "+",
+                                                left: ExprNode {
+                                                    expr: Var(
+                                                        "cursor_y",
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 33,
+                                                            column: 13,
+                                                            offset: 518,
+                                                        },
+                                                        end: Location {
+                                                            line: 33,
+                                                            column: 21,
+                                                            offset: 526,
+                                                        },
+                                                        start_offset: 518,
+                                                        end_offset: 526,
+                                                    },
+                                                },
+                                                right: ExprNode {
+                                                    expr: IntLiteral(
+                                                        1,
+                                                    ),
+                                                    span: Span {
+                                                        start: Location {
+                                                            line: 33,
+                                                            column: 24,
+                                                            offset: 529,
+                                                        },
+                                                        end: Location {
+                                                            line: 33,
+                                                            column: 25,
+                                                            offset: 530,
+                                                        },
+                                                        start_offset: 529,
+                                                        end_offset: 530,
+                                                    },
+                                                },
+                                            },
+                                            span: Span {
+                                                start: Location {
+                                                    line: 33,
+                                                    column: 13,
+                                                    offset: 518,
+                                                },
+                                                end: Location {
+                                                    line: 33,
+                                                    column: 25,
+                                                    offset: 530,
+                                                },
+                                                start_offset: 518,
+                                                end_offset: 530,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 33,
+                                            column: 2,
+                                            offset: 507,
+                                        },
+                                        end: Location {
+                                            line: 33,
+                                            column: 25,
+                                            offset: 530,
+                                        },
+                                        start_offset: 507,
+                                        end_offset: 530,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 33,
+                                    column: 2,
+                                    offset: 507,
+                                },
+                                end: Location {
+                                    line: 33,
+                                    column: 26,
+                                    offset: 531,
+                                },
+                                start_offset: 507,
+                                end_offset: 531,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_x",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 34,
+                                                    column: 2,
+                                                    offset: 533,
+                                                },
+                                                end: Location {
+                                                    line: 34,
+                                                    column: 10,
+                                                    offset: 541,
+                                                },
+                                                start_offset: 533,
+                                                end_offset: 541,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: IntLiteral(
+                                                0,
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 34,
+                                                    column: 13,
+                                                    offset: 544,
+                                                },
+                                                end: Location {
+                                                    line: 34,
+                                                    column: 14,
+                                                    offset: 545,
+                                                },
+                                                start_offset: 544,
+                                                end_offset: 545,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 34,
+                                            column: 2,
+                                            offset: 533,
+                                        },
+                                        end: Location {
+                                            line: 34,
+                                            column: 14,
+                                            offset: 545,
+                                        },
+                                        start_offset: 533,
+                                        end_offset: 545,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 34,
+                                    column: 2,
+                                    offset: 533,
+                                },
+                                end: Location {
+                                    line: 34,
+                                    column: 15,
+                                    offset: 546,
+                                },
+                                start_offset: 533,
+                                end_offset: 546,
+                            },
+                        },
+                        StmtNode {
+                            stmt: If {
+                                condition: ExprNode {
+                                    expr: BinaryOp {
+                                        op: "<",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_y",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 35,
+                                                    column: 5,
+                                                    offset: 551,
+                                                },
+                                                end: Location {
+                                                    line: 35,
+                                                    column: 13,
+                                                    offset: 559,
+                                                },
+                                                start_offset: 551,
+                                                end_offset: 559,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: IntLiteral(
+                                                25,
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 35,
+                                                    column: 16,
+                                                    offset: 562,
+                                                },
+                                                end: Location {
+                                                    line: 35,
+                                                    column: 18,
+                                                    offset: 564,
+                                                },
+                                                start_offset: 562,
+                                                end_offset: 564,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 35,
+                                            column: 5,
+                                            offset: 551,
+                                        },
+                                        end: Location {
+                                            line: 35,
+                                            column: 18,
+                                            offset: 564,
+                                        },
+                                        start_offset: 551,
+                                        end_offset: 564,
+                                    },
+                                },
+                                then_branch: StmtNode {
+                                    stmt: Block(
+                                        [
+                                            StmtNode {
+                                                stmt: Return(
+                                                    None,
+                                                ),
+                                                span: Span {
+                                                    start: Location {
+                                                        line: 36,
+                                                        column: 3,
+                                                        offset: 569,
+                                                    },
+                                                    end: Location {
+                                                        line: 36,
+                                                        column: 10,
+                                                        offset: 576,
+                                                    },
+                                                    start_offset: 569,
+                                                    end_offset: 576,
+                                                },
+                                            },
+                                        ],
+                                    ),
+                                    span: Span {
+                                        start: Location {
+                                            line: 35,
+                                            column: 19,
+                                            offset: 565,
+                                        },
+                                        end: Location {
+                                            line: 37,
+                                            column: 3,
+                                            offset: 579,
+                                        },
+                                        start_offset: 565,
+                                        end_offset: 579,
+                                    },
+                                },
+                                else_branch: None,
+                            },
+                            span: Span {
+                                start: Location {
+                                    line: 35,
+                                    column: 2,
+                                    offset: 548,
+                                },
+                                end: Location {
+                                    line: 37,
+                                    column: 3,
+                                    offset: 579,
+                                },
+                                start_offset: 548,
+                                end_offset: 579,
+                            },
+                        },
+                        StmtNode {
+                            stmt: Expr(
+                                ExprNode {
+                                    expr: BinaryOp {
+                                        op: "=",
+                                        left: ExprNode {
+                                            expr: Var(
+                                                "cursor_y",
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 38,
+                                                    column: 2,
+                                                    offset: 581,
+                                                },
+                                                end: Location {
+                                                    line: 38,
+                                                    column: 10,
+                                                    offset: 589,
+                                                },
+                                                start_offset: 581,
+                                                end_offset: 589,
+                                            },
+                                        },
+                                        right: ExprNode {
+                                            expr: IntLiteral(
+                                                0,
+                                            ),
+                                            span: Span {
+                                                start: Location {
+                                                    line: 38,
+                                                    column: 13,
+                                                    offset: 592,
+                                                },
+                                                end: Location {
+                                                    line: 38,
+                                                    column: 14,
+                                                    offset: 593,
+                                                },
+                                                start_offset: 592,
+                                                end_offset: 593,
+                                            },
+                                        },
+                                    },
+                                    span: Span {
+                                        start: Location {
+                                            line: 38,
+                                            column: 2,
+                                            offset: 581,
+                                        },
+                                        end: Location {
+                                            line: 38,
+                                            column: 14,
+                                            offset: 593,
+                                        },
+                                        start_offset: 581,
+                                        end_offset: 593,
+                                    },
+                                },
+                            ),
+                            span: Span {
+                                start: Location {
+                                    line: 38,
+                                    column: 2,
+                                    offset: 581,
+                                },
+                                end: Location {
+                                    line: 38,
+                                    column: 15,
+                                    offset: 594,
+                                },
+                                start_offset: 581,
+                                end_offset: 594,
+                            },
+                        },
+                    ],
+                ),
+                span: Span {
+                    start: Location {
+                        line: 27,
+                        column: 26,
+                        offset: 444,
+                    },
+                    end: Location {
+                        line: 39,
+                        column: 2,
+                        offset: 596,
+                    },
+                    start_offset: 444,
+                    end_offset: 596,
+                },
+            },
+        },
+        span: Span {
+            start: Location {
+                line: 27,
+                column: 1,
+                offset: 419,
+            },
+            end: Location {
+                line: 39,
+                column: 2,
+                offset: 596,
+            },
+            start_offset: 419,
+            end_offset: 596,
+        },
+    },
+]

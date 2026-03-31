@@ -130,7 +130,9 @@ fn parse_opcode(input: &str) -> IResult<&str, Opcode> {
     terminated(
         alt((
             alt((
+                map(tag_no_case("storeb"), |_| Opcode::STOREB),
                 map(tag_no_case("store"), |_| Opcode::STORE),
+                map(tag_no_case("loadb"), |_| Opcode::LOADB),
                 map(tag_no_case("halt"), |_| Opcode::HALT),
                 map(tag_no_case("push"), |_| Opcode::PUSH),
                 map(tag_no_case("call"), |_| Opcode::CALL),

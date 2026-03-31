@@ -316,6 +316,14 @@ impl Cpu {
                 let value = self.get(reg1);
                 mem.write_u32(addr, value);
             }
+            Opcode::LOADB => {
+                let value = mem.read_u8(addr) as u32;
+                self.set(reg1, value);
+            }
+            Opcode::STOREB => {
+                let value = self.get(reg1) as u8;
+                mem.write_u8(addr, value);
+            }
             _ => unreachable!(),
         }
         false

@@ -116,20 +116,24 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn skip_comment(&mut self) {
-        if self.peek() == Some('/') {
-            self.advance();
-            if self.peek() == Some('/') {
-                while let Some(c) = self.peek() {
-                    self.advance();
-                    if c == '\n' {
-                        break;
-                    }
+    fn skip_comment(&mut self) -> bool {
+        let mut clone_iter = self.input_iter.clone();
+
+        if clone_iter.next() == Some('/') && clone_iter.next() == Some('/') {
+            // It really is a comment, now consume it for real
+            self.advance(); // first '/'
+            self.advance(); // second '/'
+
+            while let Some(c) = self.peek() {
+                self.advance();
+                if c == '\n' {
+                    break;
                 }
-            } else {
-                // Not a comment, just a single '/'
-                // We will handle this in next_token
             }
+
+            true
+        } else {
+            false
         }
     }
 
@@ -472,9 +476,12 @@ impl<'src> Lexer<'src> {
     }
 
     fn next_token(&mut self) -> LexerResult<Option<Token>> {
-        self.ws();
-        self.skip_comment();
-        self.ws();
+        loop {
+            self.ws();
+            if !self.skip_comment() {
+                break;
+            }
+        }
 
         if self.peek().is_none() {
             return Ok(None);
