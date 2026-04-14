@@ -169,6 +169,7 @@ pub enum Opcode {
     JG,
     JL,
     CALL,
+    CALLR,
     RET,
 
     PUSH,
@@ -184,7 +185,7 @@ impl Opcode {
 
         match self {
             RET | NOP | HALT => InstructionFormat::E,
-            NOT | PUSH | POP => InstructionFormat::R,
+            NOT | PUSH | POP | CALLR => InstructionFormat::R,
             MOV | CMP => InstructionFormat::RR,
             MOVI | NOTI | CMPI => InstructionFormat::RI,
             ADD | SUB | MUL | DIV | MOD | AND | OR | XOR => InstructionFormat::RRR,
@@ -238,7 +239,8 @@ impl TryFrom<u8> for Opcode {
             0x43 => Ok(JG),
             0x44 => Ok(JL),
             0x45 => Ok(CALL),
-            0x46 => Ok(RET),
+            0x46 => Ok(CALLR),
+            0x47 => Ok(RET),
 
             0x50 => Ok(PUSH),
             0x51 => Ok(POP),
@@ -291,7 +293,8 @@ impl From<Opcode> for u8 {
             JG => 0x43,
             JL => 0x44,
             CALL => 0x45,
-            RET => 0x46,
+            CALLR => 0x46,
+            RET => 0x47,
 
             PUSH => 0x50,
             POP => 0x51,
@@ -569,14 +572,14 @@ impl std::fmt::Display for Instruction {
                     MemoryMode::Direct => write!(f, "{} {}, [0x{:X}]", opcode, reg1, imm),
                     MemoryMode::Indirect => write!(f, "{} {}, [{}]", opcode, reg1, reg2),
                     MemoryMode::Indexed => {
-                        write!(f, "{} {}, [{} + 0x{:X}]", opcode, reg1, reg2, imm)
+                        write!(f, "{} {}, [{} + {:+#X}]", opcode, reg1, reg2, imm)
                     }
                 },
                 Opcode::STORE | Opcode::STOREB => match mode {
                     MemoryMode::Direct => write!(f, "{} [0x{:X}], {}", opcode, imm, reg1),
                     MemoryMode::Indirect => write!(f, "{} [{}], {}", opcode, reg2, reg1),
                     MemoryMode::Indexed => {
-                        write!(f, "{} [{} + 0x{:X}], {}", opcode, reg2, imm, reg1)
+                        write!(f, "{} [{} + {:+#X}], {}", opcode, reg2, imm, reg1)
                     }
                 },
                 _ => unreachable!(),

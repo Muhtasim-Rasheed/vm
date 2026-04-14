@@ -16,12 +16,15 @@ fn puts(c: *char) void {
 		putc(*c);
 		c = c + 1;
 	}
+	return;
 }
 
 fn putc(c: char) void {
 	let off: *char = GRID_OFFSET + (cursor_x + cursor_y * 80) * 2;
 	*off = c;
 	*(off + 1) = current_color;
+	advance_cursor();
+	return;
 }
 
 fn advance_cursor() void {
@@ -36,4 +39,5 @@ fn advance_cursor() void {
 		return;
 	}
 	cursor_y = 0;
+	return;
 }

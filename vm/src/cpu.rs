@@ -134,11 +134,6 @@ impl Cpu {
 
     fn execute_e(&mut self, opcode: Opcode, mem: &Memory) -> bool {
         match opcode {
-            // Opcode::RET => {
-            //     self.pc = self.pop(mem);
-            //     self.bp = self.pop(mem);
-            //     false
-            // }
             Opcode::RET => {
                 let ret_addr = mem.read_u32(self.bp);
                 let old_bp = mem.read_u32(self.bp + 4);
@@ -168,6 +163,14 @@ impl Cpu {
             Opcode::POP => {
                 let value = self.pop(mem);
                 self.set(reg1, value);
+                false
+            }
+            Opcode::CALLR => {
+                let target = self.get(reg1);
+                self.push(self.bp, mem);
+                self.push(self.pc, mem);
+                self.bp = self.sp;
+                self.pc = target;
                 false
             }
             _ => unreachable!(),
@@ -425,7 +428,7 @@ impl Cpu {
             self.pc, self.sp, self.bp, self.flags
         );
         for i in 0..14 {
-            println!("R{}: {:08X}", i, self.registers[i]);
+            println!("R{:X}: {:08X}", i, self.registers[i]);
         }
         loop {
             print!("Enter command (h for help): ");

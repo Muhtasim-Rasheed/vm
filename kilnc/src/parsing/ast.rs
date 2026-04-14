@@ -51,6 +51,8 @@ pub enum Stmt {
 pub struct ExprNode {
     pub expr: Expr,
     pub span: Span,
+    /// Filled in during semantic analysis
+    pub ty: Option<Ty>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -88,7 +90,11 @@ impl StmtNode {
 
 impl ExprNode {
     pub fn new(expr: Expr, span: Span) -> Self {
-        Self { expr, span }
+        Self {
+            expr,
+            span,
+            ty: None,
+        }
     }
 }
 
@@ -99,6 +105,18 @@ pub enum Ty {
     Void,
     Ptr(Box<Ty>),
     FnPtr { params: Vec<Ty>, return_ty: Box<Ty> },
+}
+
+impl Ty {
+    pub fn size(&self) -> usize {
+        match self {
+            Ty::Int => 4,
+            Ty::Char => 1,
+            Ty::Void => 0,
+            Ty::Ptr(_) => 4,
+            Ty::FnPtr { .. } => 4,
+        }
+    }
 }
 
 impl std::fmt::Display for Ty {

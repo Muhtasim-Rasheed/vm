@@ -1,4 +1,4 @@
-mod lower;
+mod ir;
 mod parsing;
 mod semantic_checker;
 
@@ -16,8 +16,9 @@ fn main() {
     let mut lexer = parsing::lexer::Lexer::new(&source);
     let tokens = lexer.tokenize().unwrap_or_else(|e| panic!("{}", e));
     let mut parser = parsing::parser::Parser::new(tokens, &source);
-    let ast = parser.parse().unwrap_or_else(|e| panic!("{}", e));
-    println!("{:#?}", ast);
-    let mut checker = semantic_checker::SemanticChecker::new(ast, &source);
+    let mut ast = parser.parse().unwrap_or_else(|e| panic!("{}", e));
+    let mut checker = semantic_checker::SemanticChecker::new(&mut ast, &source);
     checker.check().unwrap_or_else(|e| panic!("{}", e));
+    let ir_module = ir::lower::IrModuleBuilder::new(&ast).lower();
+    println!("{:#?}", ir_module);
 }

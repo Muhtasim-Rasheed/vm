@@ -5,13 +5,6 @@ use crate::parsing::{
     ast::{Expr, ExprNode, Stmt, StmtNode, Ty},
 };
 
-fn deref_until_not_ptr(mut ty: Ty) -> Ty {
-    while let Ty::Ptr(inner) = ty {
-        ty = *inner;
-    }
-    ty
-}
-
 fn auto_castable(from: &Ty, to: &Ty) -> bool {
     match (from, to) {
         (_, _) if from == to => true,
@@ -59,6 +52,7 @@ pub enum SemanticErrorType<'src> {
         expected: Ty,
         got: Ty,
     },
+    ReturnOutsideFunction,
 }
 
 impl<'src> std::fmt::Display for SemanticErrorType<'src> {
@@ -141,6 +135,9 @@ impl<'src> std::fmt::Display for SemanticErrorType<'src> {
             }
             SemanticErrorType::TypeMismatch { expected, got } => {
                 write!(f, "Type mismatch: expected `{}`, got `{}`", expected, got)
+            }
+            SemanticErrorType::ReturnOutsideFunction => {
+                write!(f, "Return was used outside a function.")
             }
         }
     }
@@ -276,25 +273,25 @@ impl Environment {
     }
 }
 
-pub struct SemanticChecker<'src> {
-    ast: Vec<StmtNode>,
+pub struct SemanticChecker<'src, 'ast> {
+    ast: &'ast mut [StmtNode],
     src: &'src str,
     env: Environment,
+    return_ty: Vec<Ty>,
 }
 
-impl<'src> SemanticChecker<'src> {
-    pub fn new(ast: Vec<StmtNode>, src: &'src str) -> Self {
+impl<'src, 'ast> SemanticChecker<'src, 'ast> {
+    pub fn new(ast: &'ast mut [StmtNode], src: &'src str) -> Self {
         SemanticChecker {
             ast,
             src,
             env: Environment::new(),
+            return_ty: Vec::new(),
         }
     }
 
     pub fn check(&mut self) -> SemanticResult<'src, ()> {
-        let ast = std::mem::take(&mut self.ast);
-
-        for stmt in &ast {
+        for stmt in self.ast.iter() {
             if let Stmt::FunctionDecl {
                 name,
                 params,
@@ -329,25 +326,28 @@ impl<'src> SemanticChecker<'src> {
         }
 
         // Second pass: check everything else
-        for stmt in ast {
-            self.check_stmt(stmt, true)?;
+        let src = self.src;
+        let env = &mut self.env;
+        let return_ty = &mut self.return_ty;
+        for stmt in self.ast.iter_mut() {
+            Self::check_stmt(src, env, return_ty, stmt, true)?;
         }
 
         Ok(())
     }
 
     fn try_declare_variable(
-        &mut self,
+        src: &'src str,
+        env: &mut Environment,
         name: String,
         ty: Ty,
         is_const: bool,
         span: Span,
     ) -> SemanticResult<'src, ()> {
-        if let Err(original_span) = self.env.declare_variable(name.clone(), ty, is_const, span) {
+        if let Err(original_span) = env.declare_variable(name, ty, is_const, span) {
             let original_location = original_span.start;
-            let original_decl =
-                &self.src[original_span.start_offset..original_span.end_offset].trim();
-            let duplicate_stmt = &self.src[span.start_offset..span.end_offset].trim();
+            let original_decl = &src[original_span.start_offset..original_span.end_offset].trim();
+            let duplicate_stmt = &src[span.start_offset..span.end_offset].trim();
             return Err(SemanticError {
                 error_type: SemanticErrorType::DuplicateVariable {
                     original_location,
@@ -361,58 +361,65 @@ impl<'src> SemanticChecker<'src> {
         Ok(())
     }
 
-    fn check_stmt(&mut self, stmt: StmtNode, global: bool) -> SemanticResult<'src, ()> {
-        match stmt.stmt {
+    // fn check_stmt(&mut self, stmt: &mut StmtNode, global: bool) -> SemanticResult<'src, ()> {
+    fn check_stmt(
+        src: &'src str,
+        env: &mut Environment,
+        ret_ty: &mut Vec<Ty>,
+        stmt: &mut StmtNode,
+        global: bool,
+    ) -> SemanticResult<'src, ()> {
+        match &mut stmt.stmt {
             Stmt::Const { name, ty, value } => {
-                let ty_found = self.check_expr(&value)?;
+                let ty_found = Self::check_expr(src, env, value)?;
                 if !auto_castable(&ty_found, &ty) {
                     return Err(SemanticError {
                         error_type: SemanticErrorType::TypeMismatch {
-                            expected: ty,
+                            expected: ty.clone(),
                             got: ty_found,
                         },
                         location: value.span.start,
                     });
                 }
-                self.try_declare_variable(name, ty, true, stmt.span)?;
+                Self::try_declare_variable(src, env, name.clone(), ty.clone(), true, stmt.span)?;
             }
             Stmt::Let { name, ty, value } => {
-                let ty_found = self.check_expr(&value)?;
+                let ty_found = Self::check_expr(src, env, value)?;
                 if !auto_castable(&ty_found, &ty) {
                     return Err(SemanticError {
                         error_type: SemanticErrorType::TypeMismatch {
-                            expected: ty,
+                            expected: ty.clone(),
                             got: ty_found,
                         },
                         location: value.span.start,
                     });
                 }
-                self.try_declare_variable(name, ty, false, stmt.span)?;
+                Self::try_declare_variable(src, env, name.clone(), ty.clone(), false, stmt.span)?;
             }
             Stmt::Expr(expr) => {
-                self.check_expr(&expr)?;
+                Self::check_expr(src, env, expr)?;
             }
             Stmt::Block(stmts) => {
-                self.env.enter_scope();
+                env.enter_scope();
                 for stmt in stmts {
-                    self.check_stmt(stmt, false)?;
+                    Self::check_stmt(src, env, ret_ty, stmt, false)?;
                 }
-                self.env.exit_scope();
+                env.exit_scope();
             }
             Stmt::If {
                 condition,
                 then_branch,
                 else_branch,
             } => {
-                self.check_expr(&condition)?;
-                self.check_stmt(*then_branch, false)?;
+                Self::check_expr(src, env, condition)?;
+                Self::check_stmt(src, env, ret_ty, then_branch, false)?;
                 if let Some(else_branch) = else_branch {
-                    self.check_stmt(*else_branch, false)?;
+                    Self::check_stmt(src, env, ret_ty, else_branch, false)?;
                 }
             }
             Stmt::While { condition, body } => {
-                self.check_expr(&condition)?;
-                self.check_stmt(*body, false)?;
+                Self::check_expr(src, env, condition)?;
+                Self::check_stmt(src, env, ret_ty, body, false)?;
             }
             Stmt::FunctionDecl {
                 name,
@@ -424,27 +431,36 @@ impl<'src> SemanticChecker<'src> {
                 if global {
                     // We already declared all global functions in the first pass, so we just need
                     // to check the body here.
-                    self.env.enter_scope();
+                    env.enter_scope();
                     for (param_name, param_ty) in params {
-                        self.try_declare_variable(param_name, param_ty, false, signature_span)?;
+                        Self::try_declare_variable(
+                            src,
+                            env,
+                            param_name.clone(),
+                            param_ty.clone(),
+                            false,
+                            *signature_span,
+                        )?;
                     }
-                    self.check_stmt(*body, false)?;
-                    self.env.exit_scope();
+                    ret_ty.push(return_ty.clone());
+                    Self::check_stmt(src, env, ret_ty, body, false)?;
+                    ret_ty.pop();
+                    env.exit_scope();
                     return Ok(());
                 }
 
                 let param_types = params.iter().map(|(_, ty)| ty.clone()).collect();
-                if let Err(original_span) = self.env.declare_function(
+                if let Err(original_span) = env.declare_function(
                     name.clone(),
                     return_ty.clone(),
                     param_types,
-                    signature_span,
+                    *signature_span,
                 ) {
                     let original_location = original_span.start;
                     let original_decl =
-                        &self.src[original_span.start_offset..original_span.end_offset].trim();
+                        &src[original_span.start_offset..original_span.end_offset].trim();
                     let duplicate_signature =
-                        &self.src[signature_span.start_offset..signature_span.end_offset].trim();
+                        &src[signature_span.start_offset..signature_span.end_offset].trim();
                     return Err(SemanticError {
                         error_type: SemanticErrorType::DuplicateFunction {
                             original_location,
@@ -454,31 +470,70 @@ impl<'src> SemanticChecker<'src> {
                         location: signature_span.start,
                     });
                 }
-                self.env.enter_scope();
+                env.enter_scope();
                 for (param_name, param_ty) in params {
-                    self.try_declare_variable(param_name, param_ty, false, signature_span)?;
+                    Self::try_declare_variable(
+                        src,
+                        env,
+                        param_name.clone(),
+                        param_ty.clone(),
+                        false,
+                        *signature_span,
+                    )?;
                 }
-                self.check_stmt(*body, false)?;
-                self.env.exit_scope();
+                Self::check_stmt(src, env, ret_ty, body, false)?;
+                env.exit_scope();
             }
             Stmt::Return(expr_opt) => {
-                if let Some(expr) = expr_opt {
-                    self.check_expr(&expr)?;
+                if let Some(last_ret) = ret_ty.last().cloned() {
+                    let ty = if let Some(expr) = expr_opt {
+                        Self::check_expr(src, env, expr)?
+                    } else {
+                        Ty::Void
+                    };
+                    if last_ret != ty {
+                        return Err(SemanticError {
+                            error_type: SemanticErrorType::TypeMismatch {
+                                expected: last_ret.clone(),
+                                got: ty,
+                            },
+                            location: stmt.span.start,
+                        });
+                    }
+                } else {
+                    return Err(SemanticError {
+                        error_type: SemanticErrorType::ReturnOutsideFunction,
+                        location: stmt.span.start,
+                    });
                 }
             }
         }
         Ok(())
     }
 
-    fn check_expr(&mut self, expr: &ExprNode) -> SemanticResult<'src, Ty> {
-        match &expr.expr {
+    fn check_expr(
+        src: &'src str,
+        env: &Environment,
+        expr: &mut ExprNode,
+    ) -> SemanticResult<'src, Ty> {
+        let ty = Self::check_expr_inner(src, env, expr)?;
+        expr.ty = Some(ty.clone());
+        Ok(ty)
+    }
+
+    fn check_expr_inner(
+        src: &'src str,
+        env: &Environment,
+        expr: &mut ExprNode,
+    ) -> SemanticResult<'src, Ty> {
+        match &mut expr.expr {
             Expr::IntLiteral(_) => return Ok(Ty::Int),
             Expr::CharLiteral(_) => return Ok(Ty::Char),
             Expr::StringLiteral(_) => return Ok(Ty::Ptr(Box::new(Ty::Char))),
             Expr::Var(name) => {
-                if let Some(var_info) = self.env.lookup_variable(name.as_str()) {
+                if let Some(var_info) = env.lookup_variable(name.as_str()) {
                     Ok(var_info.var_type.clone())
-                } else if let Some(fn_info) = self.env.lookup_function(name.as_str()) {
+                } else if let Some(fn_info) = env.lookup_function(name.as_str()) {
                     Ok(Ty::FnPtr {
                         params: fn_info.param_types.clone(),
                         return_ty: Box::new(fn_info.return_type.clone()),
@@ -491,8 +546,8 @@ impl<'src> SemanticChecker<'src> {
                 }
             }
             Expr::BinaryOp { left, op, right } => {
-                let left_ty = self.check_expr(&*left)?;
-                let right_ty = self.check_expr(&*right)?;
+                let left_ty = Self::check_expr(src, env, &mut *left)?;
+                let right_ty = Self::check_expr(src, env, &mut *right)?;
                 let op = op.as_str();
                 match (&left_ty, &right_ty) {
                     (Ty::Int, Ty::Int)
@@ -517,16 +572,15 @@ impl<'src> SemanticChecker<'src> {
                     {
                         return Ok(Ty::Int);
                     }
-                    (_, _) if op == "=" && auto_castable(&left_ty, &right_ty) => {
+                    (_, _) if op == "=" && auto_castable(&right_ty, &left_ty) => {
                         // make sure we arent assigning to a const!
                         if let Expr::Var(var_name) = &left.expr {
-                            if let Some(var_info) = self.env.lookup_variable(var_name.as_str()) {
+                            if let Some(var_info) = env.lookup_variable(var_name.as_str()) {
                                 if var_info.is_const {
                                     return Err(SemanticError {
-                                        error_type: SemanticErrorType::TypeMismatch {
-                                            expected: left_ty,
-                                            got: right_ty,
-                                        },
+                                        error_type: SemanticErrorType::CannotAssignToConst(
+                                            var_name.clone(),
+                                        ),
                                         location: expr.span.start,
                                     });
                                 }
@@ -556,7 +610,7 @@ impl<'src> SemanticChecker<'src> {
                 }
             }
             Expr::UnaryOp { op, expr } => {
-                let ty = self.check_expr(&*expr)?;
+                let ty = Self::check_expr(src, env, &mut *expr)?;
                 let op = op.as_str();
                 match (op, &ty) {
                     // + does absolutely nothing but it exists because why not
@@ -576,18 +630,17 @@ impl<'src> SemanticChecker<'src> {
             }
             Expr::Call { func, args } => {
                 let func_span = func.span;
-                let func_ty = self.check_expr(&*func)?;
+                let func_ty = Self::check_expr(src, env, &mut *func)?;
                 let arg_tys: Vec<Ty> = args
-                    .iter()
-                    .map(|arg| self.check_expr(arg))
+                    .iter_mut()
+                    .map(|arg| Self::check_expr(src, env, arg))
                     .collect::<SemanticResult<'src, Vec<Ty>>>()?;
                 match func_ty {
                     Ty::FnPtr { params, return_ty } => {
                         if params.len() != arg_tys.len() {
                             return Err(SemanticError {
                                 error_type: SemanticErrorType::FunctionCallArgumentCountMismatch {
-                                    func_name: self.src
-                                        [func_span.start_offset..func_span.end_offset]
+                                    func_name: src[func_span.start_offset..func_span.end_offset]
                                         .trim(),
                                     expected: params.len(),
                                     got: arg_tys.len(),
@@ -611,7 +664,7 @@ impl<'src> SemanticChecker<'src> {
                     _ => {
                         return Err(SemanticError {
                             error_type: SemanticErrorType::CannotCallNonFunction(
-                                self.src[func_span.start_offset..func_span.end_offset]
+                                src[func_span.start_offset..func_span.end_offset]
                                     .trim()
                                     .to_string(),
                             ),
@@ -621,7 +674,7 @@ impl<'src> SemanticChecker<'src> {
                 }
             }
             Expr::Deref(inner) => {
-                let ty = self.check_expr(&*inner)?;
+                let ty = Self::check_expr(src, env, &mut *inner)?;
                 match ty {
                     Ty::Ptr(inner_ty) => return Ok(*inner_ty),
                     // dereferencing an int is basically reading from memory from an address, which
@@ -636,11 +689,11 @@ impl<'src> SemanticChecker<'src> {
                 }
             }
             Expr::Addr(inner) => {
-                let ty = self.check_expr(&*inner)?;
+                let ty = Self::check_expr(src, env, &mut *inner)?;
                 return Ok(Ty::Ptr(Box::new(ty)));
             }
             Expr::Cast { expr, target_ty } => {
-                let _ = self.check_expr(&*expr)?;
+                let _ = Self::check_expr(src, env, &mut *expr)?;
                 // TODO: check
                 return Ok(target_ty.clone());
             }
