@@ -15,6 +15,7 @@ async fn main() {
 
     let mut mem = mem::Memory::new();
     mem.load(0, &bytes);
+    mem.using_macroquad = !is_debug;
     let mut cpu = cpu::Cpu::new();
 
     if is_debug {

@@ -314,7 +314,7 @@ fn parse_memory_operand<'a>(input: &'a str) -> IResult<&'a str, MemOperand<'a>> 
             ),
             map(
                 (parse_register, ws(tag("-")), parse_expr),
-                |(base, _, offset)| MemOperand::Indexed(base, Expr::Negate(Box::new(offset)))
+                |(base, _, offset)| MemOperand::Indexed(base, Expr::Negate(Box::new(offset))),
             ),
             map(parse_register, MemOperand::Indirect),
             map(parse_expr, MemOperand::Direct),

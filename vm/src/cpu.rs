@@ -513,15 +513,27 @@ impl Cpu {
                             );
                             break;
                         };
-                        println!(
-                            "Executing {}",
+                        println!("Executing {}", instruction,);
+                        if matches!(
                             instruction,
-                        );
-                        if matches!(instruction, Instruction::J { opcode: Opcode::CALL, .. }) {
+                            Instruction::J {
+                                opcode: Opcode::CALL,
+                                ..
+                            }
+                        ) {
                             call_stack.push(self.pc);
-                        } else if let Instruction::R { opcode: Opcode::CALLR, reg1 } = instruction {
+                        } else if let Instruction::R {
+                            opcode: Opcode::CALLR,
+                            reg1,
+                        } = instruction
+                        {
                             call_stack.push(self.get(reg1));
-                        } else if matches!(instruction, Instruction::E { opcode: Opcode::RET }) {
+                        } else if matches!(
+                            instruction,
+                            Instruction::E {
+                                opcode: Opcode::RET
+                            }
+                        ) {
                             call_stack.pop();
                         }
                         if self.execute(mem) {
@@ -597,37 +609,47 @@ impl Cpu {
                         println!("{:08X}: {}", bp, instruction);
                     }
                 }
-                "c" => {
-                    loop {
-                        let Some(instruction) = self.get_instruction(mem) else {
-                            println!(
-                                "Invalid instruction at address {:08X}: {:016X}",
-                                self.pc,
-                                mem.read_u64(self.pc)
-                            );
-                            break;
-                        };
+                "c" => loop {
+                    let Some(instruction) = self.get_instruction(mem) else {
                         println!(
-                            "Executing {}",
-                            instruction,
+                            "Invalid instruction at address {:08X}: {:016X}",
+                            self.pc,
+                            mem.read_u64(self.pc)
                         );
-                        if matches!(instruction, Instruction::J { opcode: Opcode::CALL, .. }) {
-                            call_stack.push(self.pc);
-                        } else if let Instruction::R { opcode: Opcode::CALLR, reg1 } = instruction {
-                            call_stack.push(self.get(reg1));
-                        } else if matches!(instruction, Instruction::E { opcode: Opcode::RET }) {
-                            call_stack.pop();
+                        break;
+                    };
+                    println!("Executing {}", instruction,);
+                    if matches!(
+                        instruction,
+                        Instruction::J {
+                            opcode: Opcode::CALL,
+                            ..
                         }
-                        if self.execute(mem) {
-                            println!("Program halted");
-                            break;
+                    ) {
+                        call_stack.push(self.pc);
+                    } else if let Instruction::R {
+                        opcode: Opcode::CALLR,
+                        reg1,
+                    } = instruction
+                    {
+                        call_stack.push(self.get(reg1));
+                    } else if matches!(
+                        instruction,
+                        Instruction::E {
+                            opcode: Opcode::RET
                         }
-                        println!(
-                            "PC: {:08X} | SP: {:08X} | BP: {:08X} | FLAGS: {:08X}",
-                            self.pc, self.sp, self.bp, self.flags
-                        );
+                    ) {
+                        call_stack.pop();
                     }
-                }
+                    if self.execute(mem) {
+                        println!("Program halted");
+                        break;
+                    }
+                    println!(
+                        "PC: {:08X} | SP: {:08X} | BP: {:08X} | FLAGS: {:08X}",
+                        self.pc, self.sp, self.bp, self.flags
+                    );
+                },
                 "q" => {
                     println!("Exiting debugger");
                     return;

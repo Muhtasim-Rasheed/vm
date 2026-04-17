@@ -49,6 +49,6 @@ fn main() {
         a: std::io::stdout(),
         b: std::fs::File::create(out_path).expect("Failed to create output file"),
     };
-    let mut codegen = codegen::CodeGenerator::new(ir_module, Box::new(out));
+    let codegen = codegen::CodeGenerator::new(ir_module, Box::new(out));
     codegen.lower().unwrap_or_else(|e| panic!("{}", e));
 }

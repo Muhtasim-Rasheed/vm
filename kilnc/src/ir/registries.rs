@@ -89,9 +89,7 @@ impl Globals {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (GlobalId, &IrGlobal)> {
-        self.entries
-            .iter()
-            .map(|g| (g.id, g))
+        self.entries.iter().map(|g| (g.id, g))
     }
 }
 
@@ -153,9 +151,7 @@ impl Functions {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (FuncId, &IrFuncDecl)> {
-        self.entries
-            .iter()
-            .map(|d| (d.id, d))
+        self.entries.iter().map(|d| (d.id, d))
     }
 }
 

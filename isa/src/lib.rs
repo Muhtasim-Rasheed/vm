@@ -193,7 +193,9 @@ impl Opcode {
 
         match self {
             RET | NOP | HALT => InstructionFormat::E,
-            NOT | PUSH | POP | CALLR | SETE | SETNE | SETL | SETG | SETLE | SETGE  => InstructionFormat::R,
+            NOT | PUSH | POP | CALLR | SETE | SETNE | SETL | SETG | SETLE | SETGE => {
+                InstructionFormat::R
+            }
             MOV | CMP => InstructionFormat::RR,
             MOVI | NOTI | CMPI => InstructionFormat::RI,
             ADD | SUB | MUL | DIV | MOD | AND | OR | XOR => InstructionFormat::RRR,
@@ -606,7 +608,7 @@ impl std::fmt::Display for Instruction {
                             write!(f, "{} {}, [{} + {}]", opcode, reg1, reg2, imm_disp)
                         }
                     }
-                },
+                }
                 Opcode::STORE | Opcode::STOREB => {
                     let imm = *imm as i32;
                     let imm_disp = if imm >= 0 {
@@ -621,7 +623,7 @@ impl std::fmt::Display for Instruction {
                             write!(f, "{} [{} + {}], {}", opcode, reg2, imm_disp, reg1)
                         }
                     }
-                },
+                }
                 _ => unreachable!(),
             },
             Instruction::J { opcode, imm } => write!(f, "{} 0x{:X}", opcode, imm),

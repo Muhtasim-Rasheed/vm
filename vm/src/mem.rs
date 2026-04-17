@@ -7,21 +7,49 @@ pub const TEXT_GRID_BYTES: usize = TEXT_GRID_SIZE * 2 - 1;
 pub const TEXT_GRID_START: u32 = 0x001F0000;
 pub const TEXT_GRID_END: u32 = TEXT_GRID_START + TEXT_GRID_BYTES as u32;
 pub const UART_ADDR: u32 = 0x001F8000;
+pub const INPUT_BYTE_FIRST: u32 = 0x001F8001;
+pub const INPUT_BYTE_SECOND: u32 = 0x001F8002;
 
 pub struct Memory {
     data: Vec<u8>,
+    pub using_macroquad: bool,
 }
 
 impl Memory {
     pub fn new() -> Self {
         Memory {
             data: vec![0; 1024 * 1024 * 2],
+            using_macroquad: true,
         }
     }
 
     pub fn read_u8(&self, addr: u32) -> u8 {
         match addr {
             UART_ADDR => 0,
+            INPUT_BYTE_FIRST => {
+                if self.using_macroquad {
+                    let key = macroquad::input::get_keys_pressed().into_iter().next();
+                    if let Some(key) = key {
+                        (key as u16).to_le_bytes()[0]
+                    } else {
+                        0
+                    }
+                } else {
+                    0
+                }
+            }
+            INPUT_BYTE_SECOND => {
+                if self.using_macroquad {
+                    let key = macroquad::input::get_keys_pressed().into_iter().next();
+                    if let Some(key) = key {
+                        (key as u16).to_le_bytes()[1]
+                    } else {
+                        0
+                    }
+                } else {
+                    0
+                }
+            }
             _ => self.data[addr as usize],
         }
     }

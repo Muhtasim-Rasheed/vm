@@ -216,9 +216,7 @@ impl<'a> IrFuncBuilder<'a> {
 
                 self.lower_stmt(body);
 
-                self.emit(IrInst::Return {
-                    value: None,
-                });
+                self.emit(IrInst::Return { value: None });
 
                 self.exit_scope();
 
