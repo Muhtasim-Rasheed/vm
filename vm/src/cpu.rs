@@ -173,6 +173,44 @@ impl Cpu {
                 self.pc = target;
                 false
             }
+            Opcode::SETE => {
+                let value = if self.flags & FLAG_ZERO != 0 { 1 } else { 0 };
+                self.set(reg1, value);
+                false
+            }
+            Opcode::SETNE => {
+                let value = if self.flags & FLAG_ZERO == 0 { 1 } else { 0 };
+                self.set(reg1, value);
+                false
+            }
+            Opcode::SETG => {
+                let value = if (self.flags & FLAG_NEG == 0) && (self.flags & FLAG_ZERO == 0) {
+                    1
+                } else {
+                    0
+                };
+                self.set(reg1, value);
+                false
+            }
+            Opcode::SETL => {
+                let value = if self.flags & FLAG_NEG != 0 { 1 } else { 0 };
+                self.set(reg1, value);
+                false
+            }
+            Opcode::SETLE => {
+                let value = if (self.flags & FLAG_NEG != 0) || (self.flags & FLAG_ZERO != 0) {
+                    1
+                } else {
+                    0
+                };
+                self.set(reg1, value);
+                false
+            }
+            Opcode::SETGE => {
+                let value = if self.flags & FLAG_NEG == 0 { 1 } else { 0 };
+                self.set(reg1, value);
+                false
+            }
             _ => unreachable!(),
         }
     }
@@ -327,6 +365,9 @@ impl Cpu {
                 let value = self.get(reg1) as u8;
                 mem.write_u8(addr, value);
             }
+            Opcode::LEA => {
+                self.set(reg1, addr);
+            }
             _ => unreachable!(),
         }
         false
@@ -378,11 +419,12 @@ impl Cpu {
             self.pc = self.pc.wrapping_add(8);
             self.execute_instruction(instr, mem)
         } else {
-            panic!(
+            println!(
                 "Invalid instruction at address {:08X}: {:016X}",
                 self.pc,
                 mem.read_u64(self.pc)
             );
+            true
         }
     }
 
@@ -430,6 +472,8 @@ impl Cpu {
         for i in 0..14 {
             println!("R{:X}: {:08X}", i, self.registers[i]);
         }
+        let mut breakpoints = Vec::new();
+        let mut call_stack = Vec::new();
         loop {
             print!("Enter command (h for help): ");
             std::io::Write::flush(&mut std::io::stdout()).unwrap();
@@ -437,15 +481,22 @@ impl Cpu {
             std::io::stdin().read_line(&mut input).unwrap();
             let input = input.trim();
             let parts: Vec<&str> = input.split_whitespace().collect();
+            if parts.is_empty() {
+                continue;
+            }
             match parts[0] {
                 "h" => {
                     println!("Commands:");
-                    println!("h - help");
-                    println!("s [<steps>] - step through instructions (default 1)");
-                    println!("p - peek current instruction");
-                    println!("r - registers");
-                    println!("m <addr> <len> - dump memory");
-                    println!("q - quit");
+                    println!("    h - help");
+                    println!("    s [<steps>] - step through instructions (default 1)");
+                    println!("    p - peek current instruction");
+                    println!("    r - registers");
+                    println!("    m <addr> <len> - dump memory");
+                    println!("    b <addr> - toggle breakpoint");
+                    println!("    bl - list breakpoints");
+                    println!("    c - continue until breakpoint");
+                    println!("    cs - list call stack");
+                    println!("    q - quit");
                 }
                 "s" => {
                     let steps = if parts.len() > 1 {
@@ -454,27 +505,33 @@ impl Cpu {
                         1
                     };
                     for _ in 0..steps {
+                        let Some(instruction) = self.get_instruction(mem) else {
+                            println!(
+                                "Invalid instruction at address {:08X}: {:016X}",
+                                self.pc,
+                                mem.read_u64(self.pc)
+                            );
+                            break;
+                        };
                         println!(
                             "Executing {}",
-                            self.get_instruction(mem).unwrap_or_else(|| {
-                                panic!(
-                                    "Invalid instruction at address {:08X}: {:016X}",
-                                    self.pc,
-                                    mem.read_u64(self.pc)
-                                )
-                            })
+                            instruction,
                         );
+                        if matches!(instruction, Instruction::J { opcode: Opcode::CALL, .. }) {
+                            call_stack.push(self.pc);
+                        } else if let Instruction::R { opcode: Opcode::CALLR, reg1 } = instruction {
+                            call_stack.push(self.get(reg1));
+                        } else if matches!(instruction, Instruction::E { opcode: Opcode::RET }) {
+                            call_stack.pop();
+                        }
                         if self.execute(mem) {
                             println!("Program halted");
-                            return;
+                            break;
                         }
                         println!(
                             "PC: {:08X} | SP: {:08X} | BP: {:08X} | FLAGS: {:08X}",
                             self.pc, self.sp, self.bp, self.flags
                         );
-                        for i in 0..14 {
-                            println!("R{}: {:08X}", i, self.registers[i]);
-                        }
                     }
                 }
                 "p" => {
@@ -513,6 +570,63 @@ impl Cpu {
                         print!("{:02X} ", mem.read_u8(addr + i));
                     }
                     println!();
+                }
+                "b" => {
+                    if parts.len() != 2 {
+                        println!("Usage: b <addr>");
+                        continue;
+                    }
+                    let addr =
+                        u32::from_str_radix(parts[1].trim_start_matches("0x"), 16).unwrap_or(0);
+                    if breakpoints.contains(&addr) {
+                        breakpoints.retain(|&x| x != addr);
+                        println!("Removed breakpoint at {:08X}", addr);
+                    } else {
+                        breakpoints.push(addr);
+                        println!("Added breakpoint at {:08X}", addr);
+                    }
+                }
+                "bl" => {
+                    println!("Breakpoints:");
+                    for bp in &breakpoints {
+                        let instruction = mem.read_u64(*bp);
+                        let Ok(instruction) = Instruction::try_from(instruction) else {
+                            println!("{:08X}: Invalid instruction {:016X}", bp, mem.read_u64(*bp));
+                            continue;
+                        };
+                        println!("{:08X}: {}", bp, instruction);
+                    }
+                }
+                "c" => {
+                    loop {
+                        let Some(instruction) = self.get_instruction(mem) else {
+                            println!(
+                                "Invalid instruction at address {:08X}: {:016X}",
+                                self.pc,
+                                mem.read_u64(self.pc)
+                            );
+                            break;
+                        };
+                        println!(
+                            "Executing {}",
+                            instruction,
+                        );
+                        if matches!(instruction, Instruction::J { opcode: Opcode::CALL, .. }) {
+                            call_stack.push(self.pc);
+                        } else if let Instruction::R { opcode: Opcode::CALLR, reg1 } = instruction {
+                            call_stack.push(self.get(reg1));
+                        } else if matches!(instruction, Instruction::E { opcode: Opcode::RET }) {
+                            call_stack.pop();
+                        }
+                        if self.execute(mem) {
+                            println!("Program halted");
+                            break;
+                        }
+                        println!(
+                            "PC: {:08X} | SP: {:08X} | BP: {:08X} | FLAGS: {:08X}",
+                            self.pc, self.sp, self.bp, self.flags
+                        );
+                    }
                 }
                 "q" => {
                     println!("Exiting debugger");

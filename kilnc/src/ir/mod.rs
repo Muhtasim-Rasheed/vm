@@ -118,7 +118,7 @@ pub enum IrInst {
         args: Vec<TempId>,
     },
     Return {
-        value: TempId,
+        value: Option<TempId>,
     },
     Label(LabelId),
 }
@@ -151,6 +151,7 @@ pub struct IrLocal {
 
 #[derive(Debug, Clone)]
 pub struct IrGlobal {
+    pub name: String,
     pub id: GlobalId,
     pub init: IrGlobalInit,
     pub is_const: bool,

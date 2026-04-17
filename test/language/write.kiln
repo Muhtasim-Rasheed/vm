@@ -1,0 +1,33 @@
+const OUT: *char = 0x001F8000;
+
+fn _start() void {
+	let i: int = -100;
+	while i < 101 {
+		write_num(i);
+		*OUT = cast<char> 10;
+		i = i + 1;
+	}
+	write_str("stringy\n");
+	return;
+}
+
+fn write_num(n: int) void {
+	if n < 0 {
+		*OUT = '-';
+		n = -n;
+	}
+
+	if n >= 10 {
+		write_num(n / 10);
+	}
+
+	*OUT = cast<char>(48 + (n % 10));
+}
+
+fn write_str(str: *char) void {
+	while *str != cast<char> 0 {
+		*OUT = *str;
+		str = str + 1;
+	}
+	return;
+}

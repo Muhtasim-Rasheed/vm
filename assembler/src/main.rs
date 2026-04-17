@@ -15,6 +15,9 @@ fn main() {
     let out_path = std::path::Path::new(&out_path_str);
     let source = std::fs::read_to_string(file_path).expect("Failed to read file");
     let out = parser::parse_instructions(&source).expect("Failed to parse instructions");
+    if !out.0.is_empty() {
+        panic!("Unparsed input remaining: {}", out.0);
+    }
     let ast = out.1;
     let symbols = lower::build_symbol_table(&ast);
     let mut symbols_vec: Vec<_> = symbols.iter().collect();
@@ -25,11 +28,13 @@ fn main() {
     let lowered = lower::lower_instructions(&ast, &symbols).expect("Failed to lower instructions");
     let mut file = std::fs::File::create(out_path).expect("Failed to create output file");
     let mut writer = std::io::BufWriter::new(&mut file);
+    let mut pc = 0u32;
 
     for instr in lowered {
         match instr {
             lower::LoweredInstruction::Instruction(instr) => {
-                println!("{}", instr);
+                println!("{:#010x}: {}", pc, instr);
+                pc += 8;
 
                 let bytes = u64::from(instr).to_le_bytes();
                 writer

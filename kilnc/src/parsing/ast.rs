@@ -2,7 +2,7 @@ use crate::parsing::Span;
 
 pub const SYMBOLS_DOUBLE: &[&str] = &["==", "!=", "<=", ">=", "&&", "||"];
 pub const SYMBOLS_SINGLE: &[&str] = &[
-    "+", "-", "*", "/", "<", ">", "=", "!", "&", "|", "(", ")", "{", "}", ";", ",", ":",
+    "+", "-", "*", "/", "%", "<", ">", "=", "!", "&", "|", "(", ")", "{", "}", ";", ",", ":",
 ];
 pub const KEYWORDS: &[&str] = &[
     "const", "let", "if", "else", "while", "fn", "return", "int", "char", "void", "cast",

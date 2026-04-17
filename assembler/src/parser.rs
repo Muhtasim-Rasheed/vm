@@ -71,11 +71,12 @@ pub enum ASTInstruction<'a> {
     Directive(Directive<'a>),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr<'a> {
     Immediate(u32),
     Label(&'a str),
     LabelOffset(&'a str, i32),
+    Negate(Box<Expr<'a>>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -92,7 +93,7 @@ pub enum Directive<'a> {
     Word(Vec<Expr<'a>>),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum MemOperand<'a> {
     Direct(Expr<'a>),
     Indirect(Register),
@@ -133,7 +134,10 @@ fn parse_opcode(input: &str) -> IResult<&str, Opcode> {
                 map(tag_no_case("storeb"), |_| Opcode::STOREB),
                 map(tag_no_case("store"), |_| Opcode::STORE),
                 map(tag_no_case("loadb"), |_| Opcode::LOADB),
-                map(tag_no_case("callr"), |_| Opcode::LOADB),
+                map(tag_no_case("callr"), |_| Opcode::CALLR),
+                map(tag_no_case("setne"), |_| Opcode::SETNE),
+                map(tag_no_case("setge"), |_| Opcode::SETGE),
+                map(tag_no_case("setle"), |_| Opcode::SETLE),
                 map(tag_no_case("halt"), |_| Opcode::HALT),
                 map(tag_no_case("push"), |_| Opcode::PUSH),
                 map(tag_no_case("call"), |_| Opcode::CALL),
@@ -145,19 +149,24 @@ fn parse_opcode(input: &str) -> IResult<&str, Opcode> {
                 map(tag_no_case("divi"), |_| Opcode::DIVI),
                 map(tag_no_case("muli"), |_| Opcode::MULI),
                 map(tag_no_case("subi"), |_| Opcode::SUBI),
+            )),
+            alt((
                 map(tag_no_case("addi"), |_| Opcode::ADDI),
                 map(tag_no_case("load"), |_| Opcode::LOAD),
                 map(tag_no_case("movi"), |_| Opcode::MOVI),
+                map(tag_no_case("sete"), |_| Opcode::SETE),
+                map(tag_no_case("setl"), |_| Opcode::SETL),
+                map(tag_no_case("setg"), |_| Opcode::SETG),
                 map(tag_no_case("nop"), |_| Opcode::NOP),
                 map(tag_no_case("pop"), |_| Opcode::POP),
-            )),
-            alt((
                 map(tag_no_case("ret"), |_| Opcode::RET),
                 map(tag_no_case("jne"), |_| Opcode::JNE),
                 map(tag_no_case("jmp"), |_| Opcode::JMP),
                 map(tag_no_case("cmp"), |_| Opcode::CMP),
                 map(tag_no_case("ori"), |_| Opcode::ORI),
                 map(tag_no_case("xor"), |_| Opcode::XOR),
+            )),
+            alt((
                 map(tag_no_case("and"), |_| Opcode::AND),
                 map(tag_no_case("not"), |_| Opcode::NOT),
                 map(tag_no_case("mod"), |_| Opcode::MOD),
@@ -166,6 +175,7 @@ fn parse_opcode(input: &str) -> IResult<&str, Opcode> {
                 map(tag_no_case("sub"), |_| Opcode::SUB),
                 map(tag_no_case("add"), |_| Opcode::ADD),
                 map(tag_no_case("mov"), |_| Opcode::MOV),
+                map(tag_no_case("lea"), |_| Opcode::LEA),
                 map(tag_no_case("jl"), |_| Opcode::JL),
                 map(tag_no_case("jg"), |_| Opcode::JG),
                 map(tag_no_case("je"), |_| Opcode::JE),
@@ -302,6 +312,10 @@ fn parse_memory_operand<'a>(input: &'a str) -> IResult<&'a str, MemOperand<'a>> 
                 (parse_register, ws(tag("+")), parse_expr),
                 |(base, _, offset)| MemOperand::Indexed(base, offset),
             ),
+            map(
+                (parse_register, ws(tag("-")), parse_expr),
+                |(base, _, offset)| MemOperand::Indexed(base, Expr::Negate(Box::new(offset)))
+            ),
             map(parse_register, MemOperand::Indirect),
             map(parse_expr, MemOperand::Direct),
         ))),
@@ -311,6 +325,7 @@ fn parse_memory_operand<'a>(input: &'a str) -> IResult<&'a str, MemOperand<'a>> 
 }
 
 fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>> {
+    #[derive(Debug)]
     enum Operand<'a> {
         Register(Register),
         Immediate(Expr<'a>),
@@ -402,7 +417,7 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
                 }
             };
             let imm = match operands.get(1) {
-                Some(Operand::Immediate(i)) => *i,
+                Some(Operand::Immediate(i)) => i.clone(),
                 _ => {
                     return Err(nom::Err::Error(nom::error::Error::new(
                         input,
@@ -469,7 +484,7 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
                 }
             };
             let imm = match operands.get(2) {
-                Some(Operand::Immediate(i)) => *i,
+                Some(Operand::Immediate(i)) => i.clone(),
                 _ => {
                     return Err(nom::Err::Error(nom::error::Error::new(
                         input,
@@ -486,7 +501,7 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
         }
         isa::InstructionFormat::M => {
             match opcode {
-                Opcode::LOAD => {
+                Opcode::LOAD | Opcode::LOADB => {
                     let reg1 = match operands.get(0) {
                         Some(Operand::Register(r)) => *r,
                         _ => {
@@ -498,7 +513,7 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
                     };
 
                     let mem = match operands.get(1) {
-                        Some(Operand::Memory(m)) => *m,
+                        Some(Operand::Memory(m)) => m.clone(),
                         _ => {
                             return Err(nom::Err::Error(nom::error::Error::new(
                                 input,
@@ -532,9 +547,9 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
                     }
                 }
 
-                Opcode::STORE => {
+                Opcode::STORE | Opcode::STOREB => {
                     let mem = match operands.get(0) {
-                        Some(Operand::Memory(m)) => *m,
+                        Some(Operand::Memory(m)) => m.clone(),
                         _ => {
                             return Err(nom::Err::Error(nom::error::Error::new(
                                 input,
@@ -578,12 +593,58 @@ fn parse_instruction<'a>(input: &'a str) -> IResult<&'a str, ASTInstruction<'a>>
                     }
                 }
 
+                Opcode::LEA => {
+                    let reg1 = match operands.get(0) {
+                        Some(Operand::Register(r)) => *r,
+                        _ => {
+                            return Err(nom::Err::Error(nom::error::Error::new(
+                                input,
+                                nom::error::ErrorKind::Digit,
+                            )));
+                        }
+                    };
+
+                    let mem = match operands.get(1) {
+                        Some(Operand::Memory(m)) => m.clone(),
+                        _ => {
+                            return Err(nom::Err::Error(nom::error::Error::new(
+                                input,
+                                nom::error::ErrorKind::Digit,
+                            )));
+                        }
+                    };
+
+                    match mem {
+                        MemOperand::Direct(expr) => ASTInstruction::M {
+                            opcode,
+                            mode: MemoryMode::Direct,
+                            reg1,
+                            reg2: Register::R0, // unused
+                            imm: expr,
+                        },
+                        MemOperand::Indirect(base) => ASTInstruction::M {
+                            opcode,
+                            mode: MemoryMode::Indirect,
+                            reg1,
+                            reg2: base,
+                            imm: Expr::Immediate(0),
+                        },
+                        MemOperand::Indexed(base, offset) => ASTInstruction::M {
+                            opcode,
+                            mode: MemoryMode::Indexed,
+                            reg1,
+                            reg2: base,
+                            imm: offset,
+                        },
+                    }
+                }
+
                 _ => unreachable!(),
             }
         }
         isa::InstructionFormat::J => {
             let imm = match operands.get(0) {
-                Some(Operand::Immediate(i)) => *i,
+                Some(Operand::Immediate(i)) => i.clone(),
                 _ => {
                     return Err(nom::Err::Error(nom::error::Error::new(
                         input,

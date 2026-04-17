@@ -53,6 +53,10 @@ pub enum SemanticErrorType<'src> {
         got: Ty,
     },
     ReturnOutsideFunction,
+    NoStartFunction,
+    InvalidStartFunction {
+        found_signature: &'src str,
+    },
 }
 
 impl<'src> std::fmt::Display for SemanticErrorType<'src> {
@@ -138,6 +142,17 @@ impl<'src> std::fmt::Display for SemanticErrorType<'src> {
             }
             SemanticErrorType::ReturnOutsideFunction => {
                 write!(f, "Return was used outside a function.")
+            }
+            SemanticErrorType::NoStartFunction => {
+                write!(
+                    f,
+                    "No `_start` function found. A `_start` function with signature `fn() -> void` is required as the entry point of the program."
+                )
+            }
+            SemanticErrorType::InvalidStartFunction { found_signature } => {
+                writeln!(f, "Invalid `_start` function signature:")?;
+                writeln!(f, "\tFound: `{}`", found_signature)?;
+                writeln!(f, "\tExpected: `fn _start() -> void`")
             }
         }
     }
@@ -291,6 +306,8 @@ impl<'src, 'ast> SemanticChecker<'src, 'ast> {
     }
 
     pub fn check(&mut self) -> SemanticResult<'src, ()> {
+        let mut found_start = false;
+
         for stmt in self.ast.iter() {
             if let Stmt::FunctionDecl {
                 name,
@@ -322,7 +339,30 @@ impl<'src, 'ast> SemanticChecker<'src, 'ast> {
                         location: signature_span.start,
                     });
                 }
+
+                if name == "_start" {
+                    found_start = true;
+                    if *return_ty != Ty::Void || !params.is_empty() {
+                        let found_signature =
+                            self.src[signature_span.start_offset..signature_span.end_offset].trim();
+                        return Err(SemanticError {
+                            error_type: SemanticErrorType::InvalidStartFunction { found_signature },
+                            location: signature_span.start,
+                        });
+                    }
+                }
             }
+        }
+
+        if !found_start {
+            return Err(SemanticError {
+                error_type: SemanticErrorType::NoStartFunction,
+                location: Location {
+                    line: 0,
+                    column: 0,
+                    offset: 0,
+                },
+            });
         }
 
         // Second pass: check everything else

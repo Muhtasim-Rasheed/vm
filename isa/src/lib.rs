@@ -141,6 +141,7 @@ pub enum Opcode {
     STORE,
     LOADB,
     STOREB,
+    LEA,
 
     ADD,
     SUB,
@@ -172,6 +173,13 @@ pub enum Opcode {
     CALLR,
     RET,
 
+    SETE,
+    SETNE,
+    SETL,
+    SETG,
+    SETLE,
+    SETGE,
+
     PUSH,
     POP,
 
@@ -185,12 +193,12 @@ impl Opcode {
 
         match self {
             RET | NOP | HALT => InstructionFormat::E,
-            NOT | PUSH | POP | CALLR => InstructionFormat::R,
+            NOT | PUSH | POP | CALLR | SETE | SETNE | SETL | SETG | SETLE | SETGE  => InstructionFormat::R,
             MOV | CMP => InstructionFormat::RR,
             MOVI | NOTI | CMPI => InstructionFormat::RI,
             ADD | SUB | MUL | DIV | MOD | AND | OR | XOR => InstructionFormat::RRR,
             ADDI | SUBI | MULI | DIVI | MODI | ANDI | ORI | XORI => InstructionFormat::RRI,
-            LOAD | STORE | LOADB | STOREB => InstructionFormat::M,
+            LOAD | STORE | LOADB | STOREB | LEA => InstructionFormat::M,
             JMP | JE | JNE | JG | JL | CALL => InstructionFormat::J,
         }
     }
@@ -209,6 +217,7 @@ impl TryFrom<u8> for Opcode {
             0x03 => Ok(STORE),
             0x04 => Ok(LOADB),
             0x05 => Ok(STOREB),
+            0x06 => Ok(LEA),
 
             0x10 => Ok(ADD),
             0x11 => Ok(SUB),
@@ -242,8 +251,15 @@ impl TryFrom<u8> for Opcode {
             0x46 => Ok(CALLR),
             0x47 => Ok(RET),
 
-            0x50 => Ok(PUSH),
-            0x51 => Ok(POP),
+            0x50 => Ok(SETE),
+            0x51 => Ok(SETNE),
+            0x52 => Ok(SETL),
+            0x53 => Ok(SETG),
+            0x54 => Ok(SETLE),
+            0x55 => Ok(SETGE),
+
+            0x60 => Ok(PUSH),
+            0x61 => Ok(POP),
 
             0xFE => Ok(NOP),
             0xFF => Ok(HALT),
@@ -263,6 +279,7 @@ impl From<Opcode> for u8 {
             STORE => 0x03,
             LOADB => 0x04,
             STOREB => 0x05,
+            LEA => 0x06,
 
             ADD => 0x10,
             SUB => 0x11,
@@ -296,8 +313,15 @@ impl From<Opcode> for u8 {
             CALLR => 0x46,
             RET => 0x47,
 
-            PUSH => 0x50,
-            POP => 0x51,
+            SETE => 0x50,
+            SETNE => 0x51,
+            SETL => 0x52,
+            SETG => 0x53,
+            SETLE => 0x54,
+            SETGE => 0x55,
+
+            PUSH => 0x60,
+            POP => 0x61,
 
             NOP => 0xFE,
             HALT => 0xFF,
@@ -568,18 +592,34 @@ impl std::fmt::Display for Instruction {
                 reg2,
                 imm,
             } => match opcode {
-                Opcode::LOAD | Opcode::LOADB => match mode {
-                    MemoryMode::Direct => write!(f, "{} {}, [0x{:X}]", opcode, reg1, imm),
-                    MemoryMode::Indirect => write!(f, "{} {}, [{}]", opcode, reg1, reg2),
-                    MemoryMode::Indexed => {
-                        write!(f, "{} {}, [{} + {:+#X}]", opcode, reg1, reg2, imm)
+                Opcode::LOAD | Opcode::LOADB | Opcode::LEA => {
+                    let imm = *imm as i32;
+                    let imm_disp = if imm >= 0 {
+                        format!("{:#X}", imm)
+                    } else {
+                        format!("-{:#X}", -imm)
+                    };
+                    match mode {
+                        MemoryMode::Direct => write!(f, "{} {}, [{}]", opcode, reg1, imm_disp),
+                        MemoryMode::Indirect => write!(f, "{} {}, [{}]", opcode, reg1, reg2),
+                        MemoryMode::Indexed => {
+                            write!(f, "{} {}, [{} + {}]", opcode, reg1, reg2, imm_disp)
+                        }
                     }
                 },
-                Opcode::STORE | Opcode::STOREB => match mode {
-                    MemoryMode::Direct => write!(f, "{} [0x{:X}], {}", opcode, imm, reg1),
-                    MemoryMode::Indirect => write!(f, "{} [{}], {}", opcode, reg2, reg1),
-                    MemoryMode::Indexed => {
-                        write!(f, "{} [{} + {:+#X}], {}", opcode, reg2, imm, reg1)
+                Opcode::STORE | Opcode::STOREB => {
+                    let imm = *imm as i32;
+                    let imm_disp = if imm >= 0 {
+                        format!("{:#X}", imm)
+                    } else {
+                        format!("-{:#X}", -imm)
+                    };
+                    match mode {
+                        MemoryMode::Direct => write!(f, "{} {}, {}", opcode, imm_disp, reg1),
+                        MemoryMode::Indirect => write!(f, "{} [{}], {}", opcode, reg2, reg1),
+                        MemoryMode::Indexed => {
+                            write!(f, "{} [{} + {}], {}", opcode, reg2, imm_disp, reg1)
+                        }
                     }
                 },
                 _ => unreachable!(),

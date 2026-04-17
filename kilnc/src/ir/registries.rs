@@ -64,9 +64,18 @@ impl Globals {
         }
 
         let id = self.entries.len() as GlobalId;
-        self.entries.push(IrGlobal { id, init, is_const });
+        self.entries.push(IrGlobal {
+            id,
+            init,
+            is_const,
+            name: name.clone(),
+        });
         self.indices.insert(name, id);
         id
+    }
+
+    pub fn label_for(&self, id: GlobalId) -> String {
+        format!("__global_{}", id)
     }
 
     pub fn get(&self, name: &str) -> Option<&IrGlobal> {
@@ -77,6 +86,12 @@ impl Globals {
 
     pub fn get_by_id(&self, id: u32) -> Option<&IrGlobal> {
         self.entries.get(id as usize)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (GlobalId, &IrGlobal)> {
+        self.entries
+            .iter()
+            .map(|g| (g.id, g))
     }
 }
 
@@ -119,8 +134,28 @@ impl Functions {
         self.entries[id as usize].entry_label = label;
     }
 
+    pub fn label_for(&self, id: FuncId) -> String {
+        format!("__func_{}", id)
+    }
+
     pub fn get(&self, name: &str) -> Option<&IrFuncDecl> {
-        self.indices.get(name).and_then(|&id| self.entries.get(id as usize))
+        self.indices
+            .get(name)
+            .and_then(|&id| self.entries.get(id as usize))
+    }
+
+    pub fn get_by_id(&self, id: u32) -> Option<&IrFuncDecl> {
+        self.entries.get(id as usize)
+    }
+
+    pub fn get_id_by_name(&self, name: &str) -> Option<FuncId> {
+        self.indices.get(name).copied()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (FuncId, &IrFuncDecl)> {
+        self.entries
+            .iter()
+            .map(|d| (d.id, d))
     }
 }
 

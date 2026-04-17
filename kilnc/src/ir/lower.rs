@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use crate::{
     ir::{
-        registries::{Functions, Globals, StringTable}, IrFunc, IrGlobalInit, IrInst, IrLocal, IrModule, LabelId, LocalId, TempId, ValueRef
+        IrFunc, IrGlobalInit, IrInst, IrLocal, IrModule, LabelId, LocalId, TempId, ValueRef,
+        registries::{Functions, Globals, StringTable},
     },
     parsing::ast::{Expr, ExprNode, Stmt, StmtNode, Ty},
 };
@@ -138,19 +139,13 @@ impl<'a> IrFuncBuilder<'a> {
                 let local = self.declare_local(name, true);
                 let value = self.lower_expr(value);
 
-                self.emit(IrInst::StoreLocal {
-                    local,
-                    src: value,
-                });
+                self.emit(IrInst::StoreLocal { local, src: value });
             }
             Stmt::Let { name, ty: _, value } => {
                 let local = self.declare_local(name, false);
                 let value = self.lower_expr(value);
 
-                self.emit(IrInst::StoreLocal {
-                    local,
-                    src: value,
-                });
+                self.emit(IrInst::StoreLocal { local, src: value });
             }
             Stmt::Expr(expr) => {
                 self.lower_expr(expr);
@@ -162,12 +157,19 @@ impl<'a> IrFuncBuilder<'a> {
                 }
                 self.exit_scope();
             }
-            Stmt::If { condition, then_branch, else_branch } => {
+            Stmt::If {
+                condition,
+                then_branch,
+                else_branch,
+            } => {
                 let else_label = self.new_label();
                 let end_label = self.new_label();
 
                 let cond_temp = self.lower_expr(condition);
-                self.emit(IrInst::JumpIfZero { cond: cond_temp, target: else_label });
+                self.emit(IrInst::JumpIfZero {
+                    cond: cond_temp,
+                    target: else_label,
+                });
 
                 self.lower_stmt(then_branch);
                 self.emit(IrInst::Jump { target: end_label });
@@ -184,10 +186,15 @@ impl<'a> IrFuncBuilder<'a> {
 
                 self.emit_label(start_label);
                 let cond_temp = self.lower_expr(condition);
-                self.emit(IrInst::JumpIfZero { cond: cond_temp, target: end_label });
+                self.emit(IrInst::JumpIfZero {
+                    cond: cond_temp,
+                    target: end_label,
+                });
 
                 self.lower_stmt(body);
-                self.emit(IrInst::Jump { target: start_label });
+                self.emit(IrInst::Jump {
+                    target: start_label,
+                });
 
                 self.emit_label(end_label);
             }
@@ -209,9 +216,8 @@ impl<'a> IrFuncBuilder<'a> {
 
                 self.lower_stmt(body);
 
-                // ensure return exists
                 self.emit(IrInst::Return {
-                    value: self.dummy_temp
+                    value: None,
                 });
 
                 self.exit_scope();
@@ -219,12 +225,8 @@ impl<'a> IrFuncBuilder<'a> {
                 self.other_functions.declare(name, params.len());
             }
             Stmt::Return(expr) => {
-                if let Some(expr) = expr {
-                    let value = self.lower_expr(expr);
-                    self.emit(IrInst::Return { value });
-                } else {
-                    self.emit(IrInst::Return { value: self.dummy_temp });
-                }
+                let value = expr.as_ref().map(|e| self.lower_expr(e));
+                self.emit(IrInst::Return { value });
             }
         }
     }
@@ -285,7 +287,10 @@ impl<'a> IrFuncBuilder<'a> {
                 value
             }
             Expr::BinaryOp { op, left, right }
-                if matches!((get_ty(left), get_ty(right), op.as_str()), (Ty::Ptr(_), Ty::Int, "+" | "-")) =>
+                if matches!(
+                    (get_ty(left), get_ty(right), op.as_str()),
+                    (Ty::Ptr(_), Ty::Int, "+" | "-")
+                ) =>
             {
                 let dst = self.new_temp();
                 let left_temp = self.lower_expr(left);
@@ -319,7 +324,10 @@ impl<'a> IrFuncBuilder<'a> {
                 dst
             }
             Expr::BinaryOp { op, left, right }
-                if matches!((get_ty(left), get_ty(right), op.as_str()), (Ty::Int, Ty::Ptr(_), "+" | "-")) =>
+                if matches!(
+                    (get_ty(left), get_ty(right), op.as_str()),
+                    (Ty::Int, Ty::Ptr(_), "+" | "-")
+                ) =>
             {
                 let dst = self.new_temp();
                 let left_temp = self.lower_expr(left);
@@ -617,9 +625,7 @@ impl<'a> IrModuleBuilder<'a> {
                 let right = self.const_expr(right);
                 match (left, right) {
                     (IrGlobalInit::Int(l), IrGlobalInit::Int(r)) => IrGlobalInit::Int(l & r),
-                    (IrGlobalInit::Char(l), IrGlobalInit::Char(r)) => {
-                        IrGlobalInit::Char(l & r)
-                    }
+                    (IrGlobalInit::Char(l), IrGlobalInit::Char(r)) => IrGlobalInit::Char(l & r),
                     _ => panic!("invalid operands for & in global initializer"),
                 }
             }
@@ -628,9 +634,7 @@ impl<'a> IrModuleBuilder<'a> {
                 let right = self.const_expr(right);
                 match (left, right) {
                     (IrGlobalInit::Int(l), IrGlobalInit::Int(r)) => IrGlobalInit::Int(l | r),
-                    (IrGlobalInit::Char(l), IrGlobalInit::Char(r)) => {
-                        IrGlobalInit::Char(l | r)
-                    }
+                    (IrGlobalInit::Char(l), IrGlobalInit::Char(r)) => IrGlobalInit::Char(l | r),
                     _ => panic!("invalid operands for | in global initializer"),
                 }
             }
@@ -674,7 +678,9 @@ impl<'a> IrModuleBuilder<'a> {
 
     fn lower_function(&mut self, stmt: &StmtNode) {
         let (name, params, body) = match &stmt.stmt {
-            Stmt::FunctionDecl { name, params, body, .. } => (name, params, body),
+            Stmt::FunctionDecl {
+                name, params, body, ..
+            } => (name, params, body),
             _ => unreachable!(),
         };
 

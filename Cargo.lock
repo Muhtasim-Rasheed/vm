@@ -145,6 +145,9 @@ version = "0.1.0"
 [[package]]
 name = "kilnc"
 version = "0.1.0"
+dependencies = [
+ "isa",
+]
 
 [[package]]
 name = "libc"

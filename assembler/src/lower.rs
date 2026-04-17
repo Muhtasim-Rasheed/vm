@@ -44,6 +44,10 @@ pub fn resolve_expr<'a>(
 
             Ok(value as u32)
         }
+        Expr::Negate(inner) => {
+            let value = resolve_expr(*inner, symbols)?;
+            Ok(value.wrapping_neg())
+        }
     }
 }
 

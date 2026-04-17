@@ -1,8 +1,15 @@
+let string_global: *char = "Hello, World!";
+
 fn _start() void {
-	four();
+	let number: int = make_four();
+	number = make_two();
 	return;
 }
 
-fn four() int {
+fn make_four() int {
 	return 4;
+}
+
+fn make_two() int {
+	return 2;
 }
