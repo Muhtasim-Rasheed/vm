@@ -1,7 +1,10 @@
+use crate::sourceloader::expand_includes;
+
 mod codegen;
 mod ir;
 mod parsing;
 mod semantic_checker;
+mod sourceloader;
 
 struct TeeWriter<W1: std::io::Write, W2: std::io::Write> {
     a: W1,
@@ -41,7 +44,8 @@ fn main() {
     let mut lexer = parsing::lexer::Lexer::new(&source);
     let tokens = lexer.tokenize().unwrap_or_else(|e| panic!("{}", e));
     let mut parser = parsing::parser::Parser::new(tokens, &source);
-    let mut ast = parser.parse().unwrap_or_else(|e| panic!("{}", e));
+    let ast = parser.parse().unwrap_or_else(|e| panic!("{}", e));
+    let mut ast = expand_includes(ast, file_path, &mut std::collections::HashSet::new());
     let mut checker = semantic_checker::SemanticChecker::new(&mut ast, &source);
     checker.check().unwrap_or_else(|e| panic!("{}", e));
     let ir_module = ir::lower::IrModuleBuilder::new(&ast).lower();

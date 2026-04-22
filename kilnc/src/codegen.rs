@@ -41,7 +41,7 @@ impl StackFrame {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum OptimizableInst {
     Load { reg: String, addr: String },
     Store { reg: String, addr: String },
@@ -79,8 +79,9 @@ impl CodeGenerator {
         Ok(self.lines)
     }
 
-    fn optimize(&mut self) {
+    fn optimize_step(&mut self) {
         let mut optimized_lines = Vec::new();
+        let mut optimizable_insts = Vec::new();
         let mut i = 0;
         while i < self.lines.len() {
             if i + 1 < self.lines.len() {
@@ -109,6 +110,10 @@ impl CodeGenerator {
                         },
                     ) if reg1 == reg2 && addr1 == addr2 => {
                         optimized_lines.push(format!("\tstore [{}], {}", addr1, reg1));
+                        optimizable_insts.push(OptimizableInst::Store {
+                            reg: reg1.clone(),
+                            addr: addr1.clone(),
+                        });
                         i += 2;
                         continue;
                     }
@@ -116,9 +121,20 @@ impl CodeGenerator {
                 }
             }
             optimized_lines.push(self.lines[i].clone());
+            optimizable_insts.push(self.optimizable_insts[i].clone());
             i += 1;
         }
         self.lines = optimized_lines;
+        self.optimizable_insts = optimizable_insts;
+    }
+
+    fn optimize(&mut self) {
+        let mut changed = true;
+        while changed {
+            let before_len = self.lines.len();
+            self.optimize_step();
+            changed = self.lines.len() < before_len;
+        }
     }
 
     fn flush(&mut self) -> std::io::Result<()> {

@@ -226,6 +226,9 @@ impl<'a> IrFuncBuilder<'a> {
                 let value = expr.as_ref().map(|e| self.lower_expr(e));
                 self.emit(IrInst::Return { value });
             }
+            Stmt::Include(_) => {
+                // includes are handled in the source loading phase, so we can just ignore them here
+            }
         }
     }
 

@@ -146,6 +146,36 @@ impl<'src> Parser<'src> {
         }
     }
 
+    fn expect_string_literal(&mut self) -> ParserResult<'src, String> {
+        match self.next() {
+            Some(Token {
+                kind: TokenKind::StringLiteral(value),
+                ..
+            }) => Ok(value.clone()),
+            Some(token) => {
+                let (start_off, end_off) = (token.span.start_offset, token.span.end_offset);
+                let start_loc = token.span.start;
+                Err(ParserError {
+                    error_type: ParserErrorType::UnexpectedToken(
+                        &self.src[start_off..end_off],
+                        Some(TokenKind::StringLiteral("string literal".to_string())),
+                    ),
+                    location: start_loc,
+                })
+            }
+            None => Err(ParserError {
+                error_type: ParserErrorType::UnexpectedEOF(Some(TokenKind::StringLiteral(
+                    "string literal".to_string(),
+                ))),
+                location: Location {
+                    line: 0,
+                    column: 0,
+                    offset: self.src.len(),
+                },
+            }),
+        }
+    }
+
     fn parse_type(&mut self) -> ParserResult<'src, Ty> {
         // int
         // *char
@@ -596,6 +626,16 @@ impl<'src> Parser<'src> {
         Ok(StmtNode::new(Stmt::Return(value), Span::new(start, end)))
     }
 
+    fn parse_include(&mut self) -> ParserResult<'src, StmtNode> {
+        let start = self
+            .expect(TokenKind::Keyword("include".to_string()))?
+            .span
+            .start;
+        let path = self.expect_string_literal()?;
+        let end = self.expect(TokenKind::Symbol(";".to_string()))?.span.end;
+        Ok(StmtNode::new(Stmt::Include(path), Span::new(start, end)))
+    }
+
     fn parse_stmt(&mut self) -> ParserResult<'src, StmtNode> {
         match self.peek().map(|t| &t.kind) {
             Some(TokenKind::Keyword(kw)) if kw == "const" => self.parse_const(),
@@ -605,6 +645,7 @@ impl<'src> Parser<'src> {
             Some(TokenKind::Keyword(kw)) if kw == "while" => self.parse_while(),
             Some(TokenKind::Keyword(kw)) if kw == "fn" => self.parse_function_decl(),
             Some(TokenKind::Keyword(kw)) if kw == "return" => self.parse_return(),
+            Some(TokenKind::Keyword(kw)) if kw == "include" => self.parse_include(),
             _ => self.parse_expr_stmt(),
         }
     }

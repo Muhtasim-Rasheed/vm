@@ -547,6 +547,9 @@ impl<'src, 'ast> SemanticChecker<'src, 'ast> {
                     });
                 }
             }
+            Stmt::Include(_) => {
+                // includes are handled in the source loading phase, so we can just ignore them here
+            }
         }
         Ok(())
     }
